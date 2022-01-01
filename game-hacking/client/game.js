@@ -1,8 +1,7 @@
+// Copyright © 2021  Jakob L. Kreuze <zerodaysfordays@sdf.org>
+
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext('2d');
-
-const tileWidth = 32;
-const tileHeight = 32;
 
 // ---
 const socket = new WebSocket('ws://localhost:8765');
@@ -90,9 +89,16 @@ const MENU_STATE = {
             },
             {
                 "type": "button",
-                "id": "resume",
-                "label": "Resume",
+                "id": "start",
+                "label": "Start Game",
                 "enabled": false,
+                "action": (menuState) => {
+                    GAME_STATE.loadWorld("grasslands");
+                    window.removeEventListener('load', renderMenu);
+                    document.removeEventListener('keydown', handleKeyDownMenu);
+                    window.addEventListener('load', renderViewport);
+                    document.addEventListener('keydown', handleKeyDownGame);
+                }
             },
             {
                 "type": "button",
@@ -164,10 +170,11 @@ const MENU_STATE = {
                     menuState.updateLabel("account_info", "Logged in as: " + response.username);
                     menuState.enableId("account_info");
                     menuState.enableId("spacer");
+                    menuState.enableId("start");
                     menuState.enableId("create_character");
                     menuState.enableId("logout");
                     menuState.currentItem = 0;
-                    renderViewport();
+                    renderMenu();
                 }
             }
         ],
@@ -213,15 +220,16 @@ const MENU_STATE = {
                     menuState.disableId("login");
                     menuState.updateLabel("account_info", "Logged in as: " + response.username);
                     menuState.enableId("account_info");
-                    menuState.enableId("spacer");
                     if (response.character !== null) {
                         menuState.updateLabel("character_info", "Current character: " + response.character.name);
                         menuState.enableId("character_info");
                     }
+                    menuState.enableId("spacer");
+                    menuState.enableId("start");
                     menuState.enableId("create_character");
                     menuState.enableId("logout");
                     menuState.currentItem = 0;
-                    renderViewport();
+                    renderMenu();
                 }
 
             }
@@ -335,7 +343,10 @@ const MENU_STATE = {
                     menuState.currentMenuName = "main";
                     menuState.updateLabel("character_info", "Current character: " + response.name);
                     menuState.enableId("character_info");
-                    renderViewport();
+                    renderMenu();
+
+                    // Load in the world from the server.
+                    window.localStorage.setItem('world', JSON.stringify(response.world));
                 }
 
             }
@@ -392,18 +403,14 @@ function load_image(name) {
     return img;
 }
 
+const tileWidth = 32;
+const tileHeight = 32;
 const TILES = [
     load_image("floor.cobble_blood_10_new"),
+    load_image("floor.grass.grass_0_old"),
+    load_image("floor.grass.grass_1_old"),
+    load_image("floor.grass.grass_2_old"),
 ];
-
-const tiles = [];
-for (let y = 0; y < canvas.height / tileHeight; y++) {
-    tiles.push([]);
-    for (let x = 0; x < canvas.width / tileWidth; x++) {
-        const tile_id = 0;
-        tiles[y].push(0);
-    }
-}
 
 const TITLE_COLOR = ["#ff3b00", "#ff5c00", "#ff8400", "#ffa500", "#ffbf00", "#ffe000", "#ffed00"];
 const MAPLE = ["::::    ::::      :::     :::::::::  :::        ::::::::::",
@@ -421,13 +428,13 @@ const QUEST = ["  ::::::::   :::    ::: ::::::::::  ::::::::  ::::::::::: ",
                " #+#   +#+   #+#    #+# #+#        #+#    #+#     #+#     ",
                "  ###### ###  ########  ##########  ########      ###     "];;
 
-function renderViewport() {
+function renderMenu() {
     ctx.fillStyle = "#333333";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     for (let y = 0; y < canvas.height / tileHeight; y++) {
         for (let x = 0; x < canvas.width / tileWidth; x++) {
-            ctx.drawImage(TILES[tiles[y][x]], x * tileWidth, y * tileHeight);
+            ctx.drawImage(TILES[0], x * tileWidth, y * tileHeight);
         }
     }
 
@@ -495,11 +502,7 @@ function renderViewport() {
     }
 }
 
-window.addEventListener('load', () => {
-    renderViewport();
-});
-
-document.addEventListener('keydown', (e) => {
+function handleKeyDownMenu(e) {
     const entities = MENU_STATE.currentMenu().filter((ent) => ent.enabled);
     const entity = entities[MENU_STATE.currentItem];
     switch (e.key) {
@@ -551,5 +554,78 @@ document.addEventListener('keydown', (e) => {
         }
         break;
     }
+    renderMenu();
+}
+
+window.addEventListener('load', renderMenu);
+document.addEventListener('keydown', handleKeyDownMenu);
+
+// ---
+
+// Message buffer
+
+const messageBuffer = [];
+function log(message) {
+    messageBuffer.push(message);
+    if (messageBuffer.length >= 4) {
+        messageBuffer.shift();
+    }
+}
+
+// In tiles.
+const viewportWidth = 24;
+const viewportHeight = 18;
+
+const GAME_STATE = {
+    "cameraX": 0,
+    "cameraY": 0,
+    "tileMap": null,
+    // ---
+    // TODO: We're clearly missing the portals.
+    "loadWorld": function (name) {
+        const object = JSON.parse(atob(JSON.parse(window.localStorage.getItem('world')).blob));
+        this.tileMap = object["tilemaps"][name];
+    }
+}
+
+function renderViewport() {
+    const worldWidth = GAME_STATE.tileMap[0].length;
+    const worldHeight = GAME_STATE.tileMap.length;
+    const tileMap = GAME_STATE.tileMap;
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.font = '24px monospace';
+    for (let y = 0; y < viewportHeight; y++) {
+        for (let x = 0; x < viewportWidth; x++) {
+            let worldX = x + GAME_STATE["cameraX"];
+            let worldY = y + GAME_STATE["cameraY"];
+            if (worldY >= 0 && worldY < worldHeight && worldX >= 0 && worldX < worldWidth) {
+                let tile_id = tileMap[worldY][worldX];
+                ctx.drawImage(TILES[tile_id], x * tileWidth, y * tileHeight);
+            }
+            // 
+        }
+    }
+    ctx.fillText(
+        '🥷',
+        (viewportWidth / 2 - 1) * tileWidth + 4,
+        (viewportHeight / 2 - 1) * tileHeight + 24
+    );
+    ctx.font = '16px monospace';
+    for (let y = 1; y < 1 + messageBuffer.length; y++) {
+        ctx.fillText(messageBuffer[y - 1], 0, viewportHeight * tileHeight + 16 * y);
+    }
+}
+
+function handleKeyDownGame(e) {
+    if (e.key == "8") {
+        cameraY--;
+    } else if (e.key == "2") {
+        cameraY++;
+    } else if (e.key == "4") {
+        cameraX--;
+    } else if (e.key == "6") {
+        cameraX++;
+    }
     renderViewport();
-});
+}

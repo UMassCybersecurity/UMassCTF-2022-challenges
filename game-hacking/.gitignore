@@ -1,4 +1,6 @@
 Dungeon Crawl Stone Soup Full/
 server/users.db
+server/__pycache__/
 # This is to prevent a bunch of unused assets from showing up in `git status
 client/assets/*
+

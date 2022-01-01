@@ -164,9 +164,6 @@ const MENU_STATE = {
                     menuState.updateLabel("account_info", "Logged in as: " + response.username);
                     menuState.enableId("account_info");
                     menuState.enableId("spacer");
-                    if (response.character !== null) {
-                        menuState.enableId("resume");
-                    }
                     menuState.enableId("create_character");
                     menuState.enableId("logout");
                     menuState.currentItem = 0;
@@ -218,7 +215,8 @@ const MENU_STATE = {
                     menuState.enableId("account_info");
                     menuState.enableId("spacer");
                     if (response.character !== null) {
-                        menuState.enableId("resume");
+                        menuState.updateLabel("character_info", "Current character: " + response.character.name);
+                        menuState.enableId("character_info");
                     }
                     menuState.enableId("create_character");
                     menuState.enableId("logout");

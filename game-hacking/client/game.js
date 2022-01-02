@@ -620,6 +620,10 @@ function renderViewport() {
 function handleKeyDownGame(e) {
     if (e.key == "8") {
         cameraY--;
+        // await queuePacket({
+        //     "type": "move_or_interact",
+        //     "north"
+        // })
     } else if (e.key == "2") {
         cameraY++;
     } else if (e.key == "4") {

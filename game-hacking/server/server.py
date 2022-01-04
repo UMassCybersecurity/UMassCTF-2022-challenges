@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
+from base64 import b64encode
 import asyncio
 import copy
 import hashlib
 import json
+import secrets
 import sqlite3
 import time
+import traceback
 import websockets
 
 import worldgen
@@ -189,6 +192,12 @@ def allowed_by_rate_limit(endpoint, ip):
     RATE_LIMITER[ip][endpoint] += 1
     return RATE_LIMITER[ip][endpoint] >= RATE_LIMIT
 
+SESSIONS = []
+
+def lookup_session(token):
+    for session in SESSIONS:
+        if session.token == token:
+            return session
 
 class Connection(object):
     """State associated with a particular connection.
@@ -221,7 +230,11 @@ class Connection(object):
 
         print("Successfully registered as {}".format(username))
         self.logged_in = True
+        self.username = username
+        self.token = b64encode(secrets.token_bytes(16)).decode()
+        SESSIONS.append(self)
         return {
+            "token": self.token,
             "username": username,
             "character": None
         }
@@ -240,7 +253,13 @@ class Connection(object):
         self.logged_in = True
         self.username = username
         self.game_state = GameState(Character.deserialize(self.character()))
+        for i, session in enumerate(SESSIONS):
+            if session.username == username:
+                SESSIONS.pop(i)
+        self.token = b64encode(secrets.token_bytes(16)).decode()
+        SESSIONS.append(self)
         return {
+            "token": self.token,
             "username": username,
             "character": self.character()
         }
@@ -311,9 +330,19 @@ def handle_client_packet(message):
 async def handle_connection(websocket):
     c = Connection(websocket.remote_address)
     while True:
-        packet = await websocket.recv()
         try:
+            packet = await websocket.recv()
             message = json.loads(packet)
+
+            # Special handling for re-connects.
+            if message.get("type") == "reconnect" and "token" in message:
+                tmp = lookup_session(message["token"])
+                if tmp is not None:
+                    c = tmp
+                else:
+                    print("Invalid token")
+                continue
+
             message_id = message.get("id")
             thunk = handle_client_packet(message.get("data", {}))
             await websocket.send(json.dumps({
@@ -321,7 +350,16 @@ async def handle_connection(websocket):
                 "data": thunk(c)
             }))
         except json.JSONDecodeError:
-            pass
+            await websocket.send(json.dumps({
+                "error": "Invalid JSON"
+            }))
+        except websockets.exceptions.ConnectionClosedOK:
+            print("Received disconnect: {}".format(websocket.remote_address))
+            break
+        except Exception as e:
+            await websocket.send(json.dumps({
+                "error": "Unhandled internal server error: {}".format(traceback.format_exc())
+            }))
 
 
 async def main():

@@ -4,7 +4,42 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext('2d');
 
 // ---
-const socket = new WebSocket('ws://localhost:8765');
+var TOKEN = null;
+var socket = new WebSocket('ws://localhost:8765');
+
+function initializeSocket(socket, reconnect) {
+    socket.addEventListener('open', function (event) {
+        if (reconnect && TOKEN !== null) {
+            socket.send(JSON.stringify({ "type": "reconnect", "token": TOKEN }));
+        }
+        promiseTracker.enabled = true;
+        for (let key of Object.keys(promiseTracker.inFlight)) {
+            socket.send(JSON.stringify(promiseTracker.inFlight[key][2]));
+        }
+    });
+    socket.addEventListener('message', function (event) {
+        const response = JSON.parse(event.data);
+        if (response.hasOwnProperty("id")) {
+            const messageId = response.id;
+            promiseTracker.inFlight[messageId][0](response.data);
+            delete promiseTracker.inFlight[messageId];
+        } else if (response.hasOwnProperty("error")) {
+            console.error(response.error);
+        } else {
+            console.error("Unhandled server-side exception.");
+        }
+    });
+    socket.addEventListener('close', function (event) {
+        alert("Received disconnect from server. Reconnecting in 1s.");
+        setTimeout(function() {
+            alert("Attempting to reconnect...");
+            socket = new WebSocket('ws://localhost:8765');
+            initializeSocket(socket, true);
+        }, 1000);
+    });
+}
+
+initializeSocket(socket, false);
 const promiseTracker = {
     "enabled": false,
     "inFlight": {},
@@ -28,19 +63,6 @@ function queuePacket(data) {
         }
     }
 }
-
-socket.addEventListener('open', function (event) {
-    promiseTracker.enabled = true;
-    for (let key of Object.keys(promiseTracker.inFlight)) {
-        socket.send(JSON.stringify(promiseTracker.inFlight[key][2]));
-    }
-});
-socket.addEventListener('message', function (event) {
-    const response = JSON.parse(event.data);
-    const messageId = response.id;
-    promiseTracker.inFlight[messageId][0](response.data);
-    delete promiseTracker.inFlight[messageId];
-});
 
 // ---
 
@@ -230,6 +252,9 @@ const MENU_STATE = {
                     menuState.enableId("logout");
                     menuState.currentItem = 0;
                     renderMenu();
+
+                    // Save our token.
+                    TOKEN = response.token;
                 }
 
             }
@@ -349,6 +374,9 @@ const MENU_STATE = {
 
                     // Load in the world from the server.
                     window.localStorage.setItem('world', JSON.stringify(response.world));
+
+                    // Save our token.
+                    TOKEN = response.token;
                 }
 
             }
@@ -599,7 +627,7 @@ function renderViewport() {
     const worldWidth = GAME_STATE.tileMap[0].length;
     const worldHeight = GAME_STATE.tileMap.length;
     const tileMap = GAME_STATE.tileMap;
-    
+
     const playerPosition = GAME_STATE.position;
     const cameraX = playerPosition.x - viewportWidth / 2;
     const cameraY = playerPosition.y - viewportHeight / 2;
@@ -625,7 +653,7 @@ function renderViewport() {
                 entity["world_view"],
                 viewportX * tileWidth + 4,
                 viewportY * tileHeight + 24
-            );            
+            );
         }
     }
     ctx.fillText(

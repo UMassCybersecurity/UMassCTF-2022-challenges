@@ -38,7 +38,6 @@ socket.addEventListener('open', function (event) {
 socket.addEventListener('message', function (event) {
     const response = JSON.parse(event.data);
     const messageId = response.id;
-    // resolve
     promiseTracker.inFlight[messageId][0](response.data);
     delete promiseTracker.inFlight[messageId];
 });
@@ -66,7 +65,7 @@ const MENU_STATE = {
                 "label": "Login",
                 "enabled": true,
                 "action": (menuState) => {
-                    menuState.currentMenuName = "login";                
+                    menuState.currentMenuName = "login";
                 }
             },
             {
@@ -215,6 +214,7 @@ const MENU_STATE = {
                         return;
                     }
                     menuState.currentSession = response;
+                    GAME_STATE.character = response.character;
                     menuState.currentMenuName = "main";
                     menuState.disableId("register");
                     menuState.disableId("login");
@@ -339,9 +339,11 @@ const MENU_STATE = {
                         alert("Failed to create character.")
                         return;
                     }
-                    menuState.currentSession.character = response;
+                    menuState.currentSession.character = response.character;
+                    GAME_STATE.character = response.character;
+                    console.log(response.character);
                     menuState.currentMenuName = "main";
-                    menuState.updateLabel("character_info", "Current character: " + response.name);
+                    menuState.updateLabel("character_info", "Current character: " + response.character.name);
                     menuState.enableId("character_info");
                     renderMenu();
 
@@ -577,9 +579,14 @@ const viewportWidth = 24;
 const viewportHeight = 18;
 
 const GAME_STATE = {
-    "cameraX": 0,
-    "cameraY": 0,
+    "character": null,
+    "mode": "movement",
+    "position": {
+        "x": 0,
+        "y": 0
+    },
     "tileMap": null,
+    "mobs": [],
     // ---
     // TODO: We're clearly missing the portals.
     "loadWorld": function (name) {
@@ -593,43 +600,148 @@ function renderViewport() {
     const worldHeight = GAME_STATE.tileMap.length;
     const tileMap = GAME_STATE.tileMap;
     
+    const playerPosition = GAME_STATE.position;
+    const cameraX = playerPosition.x - viewportWidth / 2;
+    const cameraY = playerPosition.y - viewportHeight / 2;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.font = '24px monospace';
     for (let y = 0; y < viewportHeight; y++) {
         for (let x = 0; x < viewportWidth; x++) {
-            let worldX = x + GAME_STATE["cameraX"];
-            let worldY = y + GAME_STATE["cameraY"];
+            let worldX = x + cameraX;
+            let worldY = y + cameraY;
             if (worldY >= 0 && worldY < worldHeight && worldX >= 0 && worldX < worldWidth) {
                 let tile_id = tileMap[worldY][worldX];
                 ctx.drawImage(TILES[tile_id], x * tileWidth, y * tileHeight);
             }
-            // 
+            //
+        }
+    }
+    for (let entity of GAME_STATE.mobs) {
+        const viewportX = entity.position.x - cameraX;
+        const viewportY = entity.position.y - cameraY;
+        if (viewportY >= 0 && viewportY < viewportHeight && viewportX >= 0 && viewportX < viewportWidth) {
+            ctx.fillText(
+                entity["world_view"],
+                viewportX * tileWidth + 4,
+                viewportY * tileHeight + 24
+            );            
         }
     }
     ctx.fillText(
         '🥷',
-        (viewportWidth / 2 - 1) * tileWidth + 4,
-        (viewportHeight / 2 - 1) * tileHeight + 24
+        (viewportWidth / 2) * tileWidth + 4,
+        (viewportHeight / 2) * tileHeight + 24
     );
     ctx.font = '16px monospace';
+    ctx.fillStyle = "#000000";
     for (let y = 1; y < 1 + messageBuffer.length; y++) {
         ctx.fillText(messageBuffer[y - 1], 0, viewportHeight * tileHeight + 16 * y);
     }
+
+    if (GAME_STATE.mode === "inventory") {
+        for (let y = 1; y < 1 + GAME_STATE.character.inventory.length; y++) {
+            ctx.fillText(GAME_STATE.character.inventory[y - 1], 0, tileHeight + 16 * y);
+        }
+    }
 }
 
-function handleKeyDownGame(e) {
-    if (e.key == "8") {
-        cameraY--;
-        // await queuePacket({
-        //     "type": "move_or_interact",
-        //     "north"
-        // })
-    } else if (e.key == "2") {
-        cameraY++;
-    } else if (e.key == "4") {
-        cameraX--;
-    } else if (e.key == "6") {
-        cameraX++;
+
+async function handleKeyDownMovementMode(e) {
+    let response;
+    switch (e.key) {
+    case "8" :
+        response = await queuePacket({
+            "type": "move_or_interact",
+            "direction": "north"
+        });
+        break;
+    case "9" :
+        response = await queuePacket({
+            "type": "move_or_interact",
+            "direction": "northeast"
+        });
+        break;
+    case "6":
+        response = await queuePacket({
+            "type": "move_or_interact",
+            "direction": "east"
+        });
+        break;
+    case "3":
+        response = await queuePacket({
+            "type": "move_or_interact",
+            "direction": "southeast"
+        });
+        break;
+    case "2":
+        response = await queuePacket({
+            "type": "move_or_interact",
+            "direction": "south"
+        });
+        break;
+    case "1":
+        response = await queuePacket({
+            "type": "move_or_interact",
+            "direction": "southwest"
+        });
+        break;
+    case "4":
+        response = await queuePacket({
+            "type": "move_or_interact",
+            "direction": "west"
+        });
+        break;
+    case "i":
+        GAME_STATE.mode = "inventory";
+        break;
+    }
+    return response;
+}
+
+async function handleKeyDownInventoryMode(e) {
+    let response;
+    switch (e.key) {
+    case "8":
+        GAME_STATE.inventory.selected++;
+        break;
+    case "2":
+        GAME_STATE.inventory.selected--;
+        break;
+    case "Escape":
+        GAME_STATE.mode = "movement";
+        break;
+    }
+    return response;
+}
+
+async function handleKeyDownGame(e) {
+    let response;
+    switch(GAME_STATE.mode) {
+    case "movement":
+        response = await handleKeyDownMovementMode(e);
+        break;
+    case "inventory":
+        response = await handleKeyDownInventoryMode(e);
+        break;
+    }
+    if (response) {
+        console.log(response);
+        for (let update of response) {
+            console.log(update);
+            switch (update.type) {
+            case "update_position":
+                GAME_STATE.position.x = update.x;
+                GAME_STATE.position.y = update.y;
+                break;
+            case "new_mob":
+                GAME_STATE.mobs.push(update.entity);
+                break;
+            case "message":
+                log(update.text);
+                break;
+            }
+        }
     }
     renderViewport();
 }

@@ -119,6 +119,7 @@ const MENU_STATE = {
                     document.removeEventListener('keydown', handleKeyDownMenu);
                     window.addEventListener('load', renderViewport);
                     document.addEventListener('keydown', handleKeyDownGame);
+                    canvas.addEventListener('click', handleMouseClickGame);
                 }
             },
             {
@@ -720,6 +721,12 @@ async function handleKeyDownMovementMode(e) {
             "direction": "west"
         });
         break;
+    case "7":
+        response = await queuePacket({
+            "type": "move_or_interact",
+            "direction": "northwest"
+        });
+        break;
     case "i":
         GAME_STATE.mode = "inventory";
         break;
@@ -765,9 +772,46 @@ async function handleKeyDownGame(e) {
             case "new_mob":
                 GAME_STATE.mobs.push(update.entity);
                 break;
+            case "become":
+                for (let i = 0; i < GAME_STATE.mobs.length; i++) {
+                    if (GAME_STATE.mobs[i].id === update.id) {
+                        GAME_STATE.mobs[i] = update.replacement;
+                    }
+                }
+                break;
             case "message":
                 log(update.text);
                 break;
+            }
+        }
+    }
+    renderViewport();
+}
+
+
+const canvasLeft = canvas.offsetLeft + canvas.clientLeft;
+const canvasTop = canvas.offsetTop + canvas.clientTop;
+async function handleMouseClickGame(e) {
+    const playerPosition = GAME_STATE.position;
+    const cameraX = playerPosition.x - viewportWidth / 2;
+    const cameraY = playerPosition.y - viewportHeight / 2;
+    const x = event.pageX - canvasLeft;
+    const y = event.pageY - canvasTop;
+    const viewportX = cameraX + Math.floor(x / tileWidth);
+    const viewportY = cameraY + Math.floor(y / tileWidth);
+
+    for (let mob of GAME_STATE.mobs) {
+        if (mob.position.x == viewportX && mob.position.y == viewportY) {
+            switch (mob.type) {
+            case "sign":
+                const response = await queuePacket({
+                    "type": "sign_text",
+                    "id": mob.sign_id
+                });
+                log(`The sign reads: "${response.text}"`);
+                break;
+            default:
+                log(`This is a ${mob.type}.`);
             }
         }
     }

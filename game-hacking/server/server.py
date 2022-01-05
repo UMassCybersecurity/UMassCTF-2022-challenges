@@ -11,6 +11,7 @@ import time
 import traceback
 import websockets
 
+import entity
 import worldgen
 
 # Initialise the database.
@@ -30,42 +31,9 @@ cur.close()
 con.close()
 
 
-class Sign(object):
-    def __init__(self):
-        self.position = { "x": 5, "y": 5 }
-        self.text = "This sign is a test."
-
-    def interact(self, game_state):
-        return [
-            { "type": "message", "text": "The sign reads: \"{}\"".format(self.text) }
-        ]
-
-    def serialize(self):
-        return {
-            "position": self.position,
-            "world_view": "🪧",
-        }
-
-class Zombie(object):
-    def __init__(self):
-        self.position = { "x": 4, "y": 4 }
-        self.health = 5
-
-    def interact(self, game_state):
-        self.health -= 1
-        base = [
-            { "type": "message", "text": "You hit the zombie." }
-        ]
-        if self.health == 0:
-            return base + [ { "type": "message", "text": "The zombie dies!" } ]
-        return base
-
-
-    def serialize(self):
-        return {
-            "position": self.position,
-            "world_view": "🧟",
-        }
+SIGN_MESSAGES = [
+    "Welcome to MapleQuest!"
+]
 
 
 class Character(object):
@@ -128,11 +96,30 @@ class GameState(object):
     def __init__(self, character):
         self.character = character
         self.position = { "x": 0, "y": 0 }
-        self.mobs = [Sign(), Zombie()]
+        self.mobs = [entity.Sign(5, 5), entity.Zombie(4, 4)]
         self.deltas = [
             { "type": "new_mob", "entity": self.mobs[0].serialize() },
             { "type": "new_mob", "entity": self.mobs[1].serialize() }
         ]
+
+    def replace_mob(self, old_id, new):
+        for i, mob in enumerate(self.mobs):
+            if mob.id == old_id:
+                self.mobs[i] = new
+
+    def process_events(self, events):
+        processed = []
+        for event in events:
+            if event["type"] == "become":
+                self.replace_mob(event["id"], event["replacement"])
+                processed.append({
+                    "type": "become",
+                    "id": event["id"],
+                    "replacement": event["replacement"].serialize()
+                })
+            else:
+                processed.append(event)
+        return processed
 
     def move_or_interact(self, direction):
         anticipated = copy.copy(self.position)
@@ -158,8 +145,10 @@ class GameState(object):
             anticipated["x"] -= 1
 
         entity = self.find_entity(anticipated["x"], anticipated["y"])
-        if entity is not None:
-            self.deltas += entity.interact(self)
+        if entity is not None and entity.can_interact():
+            events = entity.interact(self)
+            events = self.process_events(events)
+            self.deltas += events
         else:
             self.position = anticipated
 
@@ -300,6 +289,7 @@ EXPECTED_FIELDS = {
     "register": ["username", "password"],
     "login": ["username", "password"],
     "create_character": ["name", "age", "class", "order", "morality", "bonus"],
+    "sign_text": ["id"],
     "move_or_interact": ["direction"],
 }
 
@@ -320,6 +310,11 @@ def handle_client_packet(message):
     elif packet_type == "create_character" and validate_fields(message, "create_character"):
         del message["type"]
         return lambda x: Connection.create_character(x, message)
+    elif packet_type == "sign_text" and validate_fields(message, "sign_text"):
+        idx = message["id"]
+        if idx >= 0 and idx < len(SIGN_MESSAGES):
+            return lambda x: { "text": SIGN_MESSAGES[idx] }
+        return lambda x: { "error": "No such sign!" }
     elif packet_type == "move_or_interact" and validate_fields(message, "move_or_interact"):
         del message["type"]
         return lambda x: Connection.game_action(x, GameState.move_or_interact, message)

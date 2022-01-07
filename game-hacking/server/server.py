@@ -5,6 +5,7 @@ import asyncio
 import copy
 import hashlib
 import json
+import re
 import secrets
 import sqlite3
 import time
@@ -12,6 +13,7 @@ import traceback
 import websockets
 
 import entity
+import inventory
 import worldgen
 
 # Initialise the database.
@@ -47,14 +49,20 @@ class Character(object):
         self.alliance_class = template["class"]
         self.alliance_order = template["order"]
         self.morality       = template["morality"]
-        # TODO: Parse bonus into inventory system entity.
-        self.inventory      = [template["bonus"]]
-        self.level          = 0
-        self.health         = 3
-        self.strength       = 1
-        self.constitution   = 1
-        self.intelligence   = 1
-        self.initiative     = 1
+
+        self.level        = 0
+        self.health       = 3
+        self.strength     = 1
+        self.constitution = 1
+        self.intelligence = 1
+        self.initiative   = 1
+
+        bonus_item = re.findall(r". (.*) \(.*\)", template["bonus"])[0]
+        bonus_item = inventory.deserialize({ "type": bonus_item })
+        if bonus_item is None:
+            self.inventory = []
+        else:
+            self.inventory = [bonus_item]
         return self
 
     def deserialize(serialized):
@@ -64,8 +72,7 @@ class Character(object):
         self.alliance_class = serialized["class"]
         self.alliance_order = serialized["order"]
         self.morality       = serialized["morality"]
-        # TODO: Deserialize inventory.
-        self.inventory      = serialized["inventory"]
+        self.inventory      = [inventory.deserialize(x) for x in serialized["inventory"]]
         self.level          = serialized["level"]
         self.health         = serialized["health"]
         self.strength       = serialized["strength"]
@@ -81,8 +88,7 @@ class Character(object):
             "class"        : self.alliance_class,
             "order"        : self.alliance_order,
             "morality"     : self.morality,
-            # TODO: Map deserialize onto `self.inventory`
-            "inventory"    : self.inventory,
+            "inventory"    : [x.serialize() for x in self.inventory],
             "level"        : self.level,
             "health"       : self.health,
             "strength"     : self.strength,
@@ -179,7 +185,7 @@ def allowed_by_rate_limit(endpoint, ip):
     if endpoint not in RATE_LIMITER[ip]:
         RATE_LIMITER[ip][endpoint] = 0
     RATE_LIMITER[ip][endpoint] += 1
-    return RATE_LIMITER[ip][endpoint] >= RATE_LIMIT
+    return RATE_LIMITER[ip][endpoint] <= RATE_LIMIT
 
 SESSIONS = []
 

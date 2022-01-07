@@ -670,7 +670,7 @@ function renderViewport() {
 
     if (GAME_STATE.mode === "inventory") {
         for (let y = 1; y < 1 + GAME_STATE.character.inventory.length; y++) {
-            ctx.fillText(GAME_STATE.character.inventory[y - 1], 0, tileHeight + 16 * y);
+            ctx.fillText(GAME_STATE.character.inventory[y - 1]["inventory_view"], 0, tileHeight + 16 * y);
         }
     }
 }

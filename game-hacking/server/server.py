@@ -102,16 +102,23 @@ class GameState(object):
     def __init__(self, character):
         self.character = character
         self.position = { "x": 0, "y": 0 }
-        self.mobs = [entity.Sign(5, 5), entity.Zombie(4, 4)]
+        self.mobs = [entity.Sign(5, 5), entity.Zombie(4, 4), entity.Pickup(inventory.Guitar(), 3, 4)]
         self.deltas = [
             { "type": "new_mob", "entity": self.mobs[0].serialize() },
-            { "type": "new_mob", "entity": self.mobs[1].serialize() }
+            { "type": "new_mob", "entity": self.mobs[1].serialize() },
+            { "type": "new_mob", "entity": self.mobs[2].serialize() }
         ]
 
     def replace_mob(self, old_id, new):
         for i, mob in enumerate(self.mobs):
             if mob.id == old_id:
                 self.mobs[i] = new
+
+    def delete_mob(self, id):
+        for i, mob in enumerate(self.mobs):
+            print(i, mob, id)
+            if mob.id == id:
+                return self.mobs.pop(i)
 
     def process_events(self, events):
         processed = []
@@ -123,6 +130,9 @@ class GameState(object):
                     "id": event["id"],
                     "replacement": event["replacement"].serialize()
                 })
+            elif event["type"] == "delete_mob":
+                self.delete_mob(event["id"])
+                processed.append(event)
             else:
                 processed.append(event)
         return processed
@@ -162,6 +172,17 @@ class GameState(object):
         for entity in self.mobs:
             if entity.position["x"] == x and entity.position["y"] == y:
                 return entity
+
+    def pickup_all(self):
+        ent = self.find_entity(self.position["x"], self.position["y"])
+        if isinstance(ent, entity.Pickup):
+            self.character.inventory.append(ent.item)
+            events = self.process_events([
+                { "type": "message", "text": f"You pick up the {ent.item.type()}" },
+                { "type": "new_item", "item": ent.item.serialize() },
+                { "type": "delete_mob", "id": ent.id}
+            ])
+            self.deltas += events
 
     def queue_updates(self):
         deltas = self.deltas
@@ -297,6 +318,7 @@ EXPECTED_FIELDS = {
     "create_character": ["name", "age", "class", "order", "morality", "bonus"],
     "sign_text": ["id"],
     "move_or_interact": ["direction"],
+    "pickup_all": [],
 }
 
 
@@ -324,6 +346,9 @@ def handle_client_packet(message):
     elif packet_type == "move_or_interact" and validate_fields(message, "move_or_interact"):
         del message["type"]
         return lambda x: Connection.game_action(x, GameState.move_or_interact, message)
+    elif packet_type == "pickup_all" and validate_fields(message, "pickup_all"):
+        del message["type"]
+        return lambda x: Connection.game_action(x, GameState.pickup_all, message)
     else:
         return lambda x: { "error": "Unknown packet." }
 

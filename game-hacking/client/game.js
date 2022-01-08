@@ -727,6 +727,11 @@ async function handleKeyDownMovementMode(e) {
             "direction": "northwest"
         });
         break;
+    case ",":
+        response = await queuePacket({
+            "type": "pickup_all",
+        });
+        break;
     case "i":
         GAME_STATE.mode = "inventory";
         break;
@@ -772,6 +777,9 @@ async function handleKeyDownGame(e) {
             case "new_mob":
                 GAME_STATE.mobs.push(update.entity);
                 break;
+            case "new_item":
+                GAME_STATE.character.inventory.push(update.item);
+                break;
             case "become":
                 for (let i = 0; i < GAME_STATE.mobs.length; i++) {
                     if (GAME_STATE.mobs[i].id === update.id) {
@@ -779,6 +787,15 @@ async function handleKeyDownGame(e) {
                     }
                 }
                 break;
+            case "delete_mob":
+                for (let i = 0; i < GAME_STATE.mobs.length; i++) {
+                    if (GAME_STATE.mobs[i].id === update.id) {
+                        GAME_STATE.mobs.splice(i, 1);
+                        break;
+                    }
+                }
+                break;
+
             case "message":
                 log(update.text);
                 break;
@@ -817,3 +834,38 @@ async function handleMouseClickGame(e) {
     }
     renderViewport();
 }
+
+
+// --- TEMPORARY; DO NOT COMMIT TO VC
+async function skipMenu() {
+    let response = await queuePacket({
+        "type": "register",
+        "username": "Jakob",
+        "password": "test",
+    });
+    console.log(response);
+    GAME_STATE.character = response.character;
+    TOKEN = response.token;
+    response = await queuePacket({
+        "type"     : "create_character",
+        "name"     : "jakob",
+        "age"      : 18,
+        "class"    : "🤠 post malone",
+        "order"    : "lawful",
+        "morality" : "evil",
+        "bonus"    : "🌂 umbrella (weapon)",
+    });
+    GAME_STATE.character = response.character;
+    window.localStorage.setItem('world', JSON.stringify(response.world));
+    TOKEN = response.token;
+
+    GAME_STATE.loadWorld("grasslands");
+    window.removeEventListener('load', renderMenu);
+    document.removeEventListener('keydown', handleKeyDownMenu);
+    window.addEventListener('load', renderViewport);
+    document.addEventListener('keydown', handleKeyDownGame);
+    canvas.addEventListener('click', handleMouseClickGame);
+    renderViewport();
+}
+skipMenu();
+// ---

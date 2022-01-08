@@ -27,6 +27,23 @@ class Entity(object):
         }
 
 
+class Pickup(Entity):
+    def __init__(self, item, x, y):
+        super().__init__(x, y)
+        self.item = item
+    
+    def can_interact(self):
+        return False
+
+    def serialize(self):
+        base = super().serialize()
+        base.update({
+            "world_view": "🎁",
+            "sign_id": 0
+        })
+        return base
+
+
 class Sign(Entity):
     """A signpost that the player can read.
 

@@ -184,6 +184,28 @@ class GameState(object):
             ])
             self.deltas += events
 
+    def find_free_space(self, start_x, start_y):
+        def find_free_space_recur(sx, dx, sy, dy):
+            for x in range(sx, sx + dx):
+                for y in range(sy, sy + dy):
+                    if not self.find_entity(x, y):
+                        return (x, y)
+            return find_free_space_recur(sx - 1, dx + 1, sy - 1, dy + 1)
+        return find_free_space_recur(start_x, 1, start_y, 1)
+
+    def drop_item(self, idx):
+        if idx < 0 or idx >= len(self.character.inventory):
+            return
+        x, y = self.find_free_space(self.position["x"], self.position["y"])
+        item = self.character.inventory.pop(idx)
+        pickup = entity.Pickup(item, x, y)
+        self.mobs.append(pickup)
+        events = self.process_events([
+            { "type": "message", "text": f"You drop the {item.type()}" },
+            { "type": "new_mob", "entity": pickup.serialize()}
+        ])
+        self.deltas += events
+
     def queue_updates(self):
         deltas = self.deltas
         self.deltas = []
@@ -319,6 +341,7 @@ EXPECTED_FIELDS = {
     "sign_text": ["id"],
     "move_or_interact": ["direction"],
     "pickup_all": [],
+    "drop_item": ["idx"],
 }
 
 
@@ -349,6 +372,9 @@ def handle_client_packet(message):
     elif packet_type == "pickup_all" and validate_fields(message, "pickup_all"):
         del message["type"]
         return lambda x: Connection.game_action(x, GameState.pickup_all, message)
+    elif packet_type == "drop_item" and validate_fields(message, "drop_item"):
+        del message["type"]
+        return lambda x: Connection.game_action(x, GameState.drop_item, message)
     else:
         return lambda x: { "error": "Unknown packet." }
 

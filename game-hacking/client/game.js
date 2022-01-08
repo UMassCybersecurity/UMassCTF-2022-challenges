@@ -614,6 +614,9 @@ const GAME_STATE = {
         "x": 0,
         "y": 0
     },
+    "inventory": {
+        "selected": 0,
+    },
     "tileMap": null,
     "mobs": [],
     // ---
@@ -743,10 +746,23 @@ async function handleKeyDownInventoryMode(e) {
     let response;
     switch (e.key) {
     case "8":
-        GAME_STATE.inventory.selected++;
+        if (GAME_STATE.inventory.selected < GAME_STATE.character.inventory.length - 1) {
+            GAME_STATE.inventory.selected++;
+        }
         break;
     case "2":
-        GAME_STATE.inventory.selected--;
+        if (GAME_STATE.inventory.selected > 0) {
+            GAME_STATE.inventory.selected--;
+        }
+        break;
+    case "d":
+        const idx = GAME_STATE.inventory.selected;
+        GAME_STATE.character.inventory.splice(idx, 1);
+        response = await queuePacket({
+            "type": "drop_item",
+            "idx": idx
+        });
+        GAME_STATE.mode = "movement";
         break;
     case "Escape":
         GAME_STATE.mode = "movement";

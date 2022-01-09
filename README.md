@@ -9,7 +9,11 @@ Things to include within each challenge directory:
 - `/src` directory for source files
 - `/hint` directory for any hint files
 - `README.md` file with challenge name, description, `UMASS{...}` flag and any notes [optional, internally facing]
-- `solution[.md/.txt]` file with challenge solution
+- `solution[.md/.txt]` file with challenge solution [and flag if ready]
 - [optional] `/solver` directory for any scripts for solving the challenge
 
 Flag format: `UMASS{...}` where `...` is the secret.
+
+<hr>
+<h2>Contributing</h2>
+<strong>IMPORTANT:</strong> Pushing directly to `main` is blocked! Make a branch with your changes and then create a pull request to merge your code into `main`. If you need help, don't hesitate to ask in Discord. Your pull request must contain most of the items above (main exception being the solution).

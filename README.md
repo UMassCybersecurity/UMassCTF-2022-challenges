@@ -16,4 +16,9 @@ Flag format: `UMASS{...}` where `...` is the secret.
 
 <hr>
 <h2>Contributing</h2>
-<strong>IMPORTANT:</strong> Pushing directly to `main` is blocked! Make a branch with your changes and then create a pull request to merge your code into `main`. If you need help, don't hesitate to ask in Discord. Your pull request must contain most of the items above (main exception being the solution).
+<strong>IMPORTANT:</strong> 
+
+- Pushing directly to `main` is blocked!
+- Make a branch with your changes and then create a pull request to merge your code into `main`.
+- Your pull request must contain most of the items above (main exception being the solution).
+- If you need help, don't hesitate to ask in Discord.

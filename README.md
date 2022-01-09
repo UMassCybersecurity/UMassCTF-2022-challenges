@@ -9,5 +9,7 @@ Things to include within each challenge directory:
 - `/src` directory for source files
 - `/hint` directory for any hint files
 - `README.md` file with challenge name, description, `UMASS{...}` flag and any notes [optional, internally facing]
+- `solution[.md/.txt]` file with challenge solution
+- [optional] `/solver` directory for any scripts for solving the challenge
 
 Flag format: `UMASS{...}` where `...` is the secret.

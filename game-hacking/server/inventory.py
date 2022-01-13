@@ -1,8 +1,11 @@
 import uuid
 
 class Item(object):
-    def __init__(self, id=str(uuid.uuid4())):
-        self.id = id
+    def __init__(self, id=None):
+        if id is None:
+            self.id = str(uuid.uuid4())
+        else:
+            self.id = id
 
     def type(self):
         return self.__class__.__name__.lower()

@@ -40,7 +40,7 @@ SIGN_MESSAGES = [
 
 class Character(object):
     def __init__(self):
-        pass
+        self.equipped = []
 
     def from_template(template):
         self = Character()
@@ -51,6 +51,7 @@ class Character(object):
         self.morality       = template["morality"]
 
         self.level        = 0
+        self.max_health   = 3
         self.health       = 3
         self.strength     = 1
         self.constitution = 1
@@ -74,6 +75,7 @@ class Character(object):
         self.morality       = serialized["morality"]
         self.inventory      = [inventory.deserialize(x) for x in serialized["inventory"]]
         self.level          = serialized["level"]
+        self.max_health     = serialized["max_health"]
         self.health         = serialized["health"]
         self.strength       = serialized["strength"]
         self.constitution   = serialized["constitution"]
@@ -90,6 +92,7 @@ class Character(object):
             "morality"     : self.morality,
             "inventory"    : [x.serialize() for x in self.inventory],
             "level"        : self.level,
+            "max_health"   : self.health,
             "health"       : self.health,
             "strength"     : self.strength,
             "constitution" : self.constitution,
@@ -97,12 +100,31 @@ class Character(object):
             "initiative"   : self.initiative,
         }
 
+    def equip_item(self, item):
+        self.equipped.append(item)
+        for stat in ["max_health", "health", "strength", "constitution", "intelligence", "initiative"]:
+            # TODO: Update state respectively.
+            pass
+
+    def unequip_item(self, id):
+        for i, item in enumerate(self.equipped):
+            if item.id == id:
+                for stat in ["max_health", "health", "strength", "constitution", "intelligence", "initiative"]:
+                    # TODO: Update state respectively.
+                    pass
+                return self.equipped.pop(i)
+
+    def consume_item(self, item):
+        for stat in ["max_health", "health", "strength", "constitution", "intelligence", "initiative"]:
+            # TODO: Update state respectively.
+            pass
+
 class GameState(object):
     """All-encompassing state object for a session of the game."""
     def __init__(self, character):
         self.character = character
         self.position = { "x": 0, "y": 0 }
-        self.mobs = [entity.Sign(5, 5), entity.Zombie(4, 4), entity.Pickup(inventory.Guitar(), 3, 4)]
+        self.mobs = [entity.Sign(5, 5), entity.Zombie(4, 4), entity.Pickup(inventory.Bandaid(), 3, 4)]
         self.deltas = [
             { "type": "new_mob", "entity": self.mobs[0].serialize() },
             { "type": "new_mob", "entity": self.mobs[1].serialize() },
@@ -193,16 +215,66 @@ class GameState(object):
             return find_free_space_recur(sx - 1, dx + 1, sy - 1, dy + 1)
         return find_free_space_recur(start_x, 1, start_y, 1)
 
-    def drop_item(self, idx):
-        if idx < 0 or idx >= len(self.character.inventory):
-            return
+    def find_item(self, id):
+        for i, item in enumerate(self.character.inventory):
+            if item.id == id:
+                return i
+
+    def drop_item(self, id):
         x, y = self.find_free_space(self.position["x"], self.position["y"])
+        idx = self.find_item(id)
         item = self.character.inventory.pop(idx)
         pickup = entity.Pickup(item, x, y)
         self.mobs.append(pickup)
         events = self.process_events([
             { "type": "message", "text": f"You drop the {item.type()}" },
             { "type": "new_mob", "entity": pickup.serialize()}
+        ])
+        self.deltas += events
+
+    def equip_item(self, id):
+        idx = self.find_item(id)
+        item = self.character.inventory[idx]
+        if "weapon" not in item.classes():
+            events = self.process_events([
+                { "type": "message", "text": f"You cannot equip a {item.type()}!" },
+            ])
+            self.deltas += events
+            return
+        self.character.inventory.pop(idx)
+        self.character.equip_item(item)
+        events = self.process_events([
+            { "type": "message", "text": f"You equip the {item.type()}." },
+        ])
+        self.deltas += events
+
+    def unequip_item(self, id):
+        item = self.character.unequip_item(id)
+        if item is None:
+            events = self.process_events([
+                { "type": "message", "text": f"No such item." },
+            ])
+            self.deltas += events
+            return
+        self.character.inventory.append(item)
+        events = self.process_events([
+            { "type": "message", "text": f"You unequip the {item.type()}" },
+        ])
+        self.deltas += events
+
+    def consume_item(self, id):
+        idx = self.find_item(id)
+        item = self.character.inventory[idx]
+        if "consumable" not in item.classes():
+            events = self.process_events([
+                { "type": "message", "text": f"You cannot eat a {item.type()}!" },
+            ])
+            self.deltas += events
+            return
+        self.character.inventory.pop(idx)
+        self.character.consume_item(item)
+        events = self.process_events([
+            { "type": "message", "text": f"You eat the {item.type()}. Delicious!" },
         ])
         self.deltas += events
 
@@ -341,7 +413,10 @@ EXPECTED_FIELDS = {
     "sign_text": ["id"],
     "move_or_interact": ["direction"],
     "pickup_all": [],
-    "drop_item": ["idx"],
+    "drop_item": ["id"],
+    "equip_item": ["id"],
+    "unequip_item": ["id"],
+    "consume_item": ["id"],
 }
 
 
@@ -375,6 +450,15 @@ def handle_client_packet(message):
     elif packet_type == "drop_item" and validate_fields(message, "drop_item"):
         del message["type"]
         return lambda x: Connection.game_action(x, GameState.drop_item, message)
+    elif packet_type == "equip_item" and validate_fields(message, "equip_item"):
+        del message["type"]
+        return lambda x: Connection.game_action(x, GameState.equip_item, message)
+    elif packet_type == "unequip_item" and validate_fields(message, "unequip_item"):
+        del message["type"]
+        return lambda x: Connection.game_action(x, GameState.unequip_item, message)
+    elif packet_type == "consume_item" and validate_fields(message, "consume_item"):
+        del message["type"]
+        return lambda x: Connection.game_action(x, GameState.consume_item, message)
     else:
         return lambda x: { "error": "Unknown packet." }
 

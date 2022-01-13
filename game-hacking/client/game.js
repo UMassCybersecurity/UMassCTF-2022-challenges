@@ -671,9 +671,12 @@ function renderViewport() {
         ctx.fillText(messageBuffer[y - 1], 0, viewportHeight * tileHeight + 16 * y);
     }
 
+    let line;
     if (GAME_STATE.mode === "inventory") {
         for (let y = 1; y < 1 + GAME_STATE.character.inventory.length; y++) {
-            ctx.fillText(GAME_STATE.character.inventory[y - 1]["inventory_view"], 0, tileHeight + 16 * y);
+            line = GAME_STATE.character.inventory[y - 1]["inventory_view"];
+            line = (GAME_STATE.inventory.selected == y - 1 ? "> " : "  ") + line;
+            ctx.fillText(line, 0, tileHeight + 16 * y);
         }
     }
 }
@@ -737,6 +740,7 @@ async function handleKeyDownMovementMode(e) {
         break;
     case "i":
         GAME_STATE.mode = "inventory";
+        GAME_STATE.inventory.selected = 0;
         break;
     }
     return response;
@@ -745,25 +749,64 @@ async function handleKeyDownMovementMode(e) {
 async function handleKeyDownInventoryMode(e) {
     let response;
     switch (e.key) {
-    case "8":
+    case "2":
         if (GAME_STATE.inventory.selected < GAME_STATE.character.inventory.length - 1) {
             GAME_STATE.inventory.selected++;
         }
         break;
-    case "2":
+    case "8":
         if (GAME_STATE.inventory.selected > 0) {
             GAME_STATE.inventory.selected--;
         }
         break;
     case "d":
-        const idx = GAME_STATE.inventory.selected;
-        GAME_STATE.character.inventory.splice(idx, 1);
-        response = await queuePacket({
-            "type": "drop_item",
-            "idx": idx
-        });
-        GAME_STATE.mode = "movement";
+        {
+            const idx = GAME_STATE.inventory.selected;
+            const item = GAME_STATE.character.inventory[idx];
+            GAME_STATE.character.inventory.splice(idx, 1);
+            response = await queuePacket({
+                "type": "drop_item",
+                "id": item.id
+            });
+            GAME_STATE.mode = "movement";
+        }
         break;
+    // FIXME: Both cases make assumptions that will probably not hold when the
+    // world updates are slightly more complicated.
+    case "e":
+        {
+            const idx = GAME_STATE.inventory.selected;            
+            const item = GAME_STATE.character.inventory[idx];
+            response = await queuePacket({
+                "type": "equip_item",
+                "id": item.id
+            });
+            if (response.length == 2 && response[1].text.includes("You cannot equip a")) {
+                break;
+            }
+            GAME_STATE.character.inventory.splice(idx, 1);
+            if (GAME_STATE.character.hasOwnProperty("equipped")) {
+                GAME_STATE.character.equipped.push(item);
+            } else {
+                GAME_STATE.character.equipped = [item];
+            }
+        }
+        break;
+    case "c":
+        {
+            const idx = GAME_STATE.inventory.selected;            
+            const item = GAME_STATE.character.inventory[idx];
+            response = await queuePacket({
+                "type": "consume_item",
+                "id": item.id
+            });
+            if (response.length == 2 && response[1].text.includes("You cannot eat a")) {
+                break;
+            }
+            GAME_STATE.character.inventory.splice(idx, 1);
+        }
+        break;
+
     case "Escape":
         GAME_STATE.mode = "movement";
         break;

@@ -5,6 +5,7 @@ import asyncio
 import copy
 import hashlib
 import json
+import random
 import re
 import secrets
 import sqlite3
@@ -119,28 +120,36 @@ class Character(object):
             # TODO: Update state respectively.
             pass
 
-class GameState(object):
-    """All-encompassing state object for a session of the game."""
-    def __init__(self, character):
-        self.character = character
-        self.position = { "x": 0, "y": 0 }
-        self.mobs = [entity.Sign(5, 5), entity.Zombie(4, 4), entity.Pickup(inventory.Bandaid(), 3, 4)]
-        self.deltas = [
-            { "type": "new_mob", "entity": self.mobs[0].serialize() },
-            { "type": "new_mob", "entity": self.mobs[1].serialize() },
-            { "type": "new_mob", "entity": self.mobs[2].serialize() }
+    def receive_attack(self, attack, mob):
+        return [
+            { "type": "message", "text": f"The {mob.type()} strikes!" },
         ]
 
+class GameState(object):
+    """All-encompassing state object for a session of the game."""
+    def __init__(self, character, world):
+        self.character = character
+        self.world = world
+        self.current_world = "grasslands"
+        self.position = { "x": 0, "y": 0 }
+        self.deltas = [{ "type": "new_mob", "entity": mob.serialize() } for mob in self.mobs()]
+
+    def tilemap(self):
+        return self.world["tilemaps"][self.current_world]
+
+    def mobs(self):
+        return self.world["mobs"][self.current_world]
+
     def replace_mob(self, old_id, new):
-        for i, mob in enumerate(self.mobs):
+        for i, mob in enumerate(self.mobs()):
             if mob.id == old_id:
-                self.mobs[i] = new
+                self.mobs()[i] = new
 
     def delete_mob(self, id):
-        for i, mob in enumerate(self.mobs):
+        for i, mob in enumerate(self.mobs()):
             print(i, mob, id)
             if mob.id == id:
-                return self.mobs.pop(i)
+                return self.mobs().pop(i)
 
     def process_events(self, events):
         processed = []
@@ -191,7 +200,7 @@ class GameState(object):
             self.position = anticipated
 
     def find_entity(self, x, y):
-        for entity in self.mobs:
+        for entity in self.mobs():
             if entity.position["x"] == x and entity.position["y"] == y:
                 return entity
 
@@ -225,7 +234,7 @@ class GameState(object):
         idx = self.find_item(id)
         item = self.character.inventory.pop(idx)
         pickup = entity.Pickup(item, x, y)
-        self.mobs.append(pickup)
+        self.mobs().append(pickup)
         events = self.process_events([
             { "type": "message", "text": f"You drop the {item.type()}" },
             { "type": "new_mob", "entity": pickup.serialize()}
@@ -281,6 +290,19 @@ class GameState(object):
     def queue_updates(self):
         deltas = self.deltas
         self.deltas = []
+        enemy_count = len([x for x in self.mobs() if isinstance(x, entity.Enemy)])
+        while enemy_count < 10:
+            x = random.randint(1, 126)
+            y = random.randint(1, 126)
+            if not worldgen.walkable_surface(self.tilemap()[y][x]):
+                continue
+            mob = entity.Zombie(x, y)
+            self.mobs().append(mob)
+            self.deltas.append({ "type": "new_mob", "entity": mob.serialize() })
+            enemy_count += 1
+        for ent in self.mobs():
+            if hasattr(ent, "tick"):
+                deltas += ent.tick(self)
         return [
             { "type": "update_position", "x": self.position["x"], "y": self.position["y"] },
         ] + deltas
@@ -384,11 +406,12 @@ class Connection(object):
         cur.execute('''UPDATE users SET character = ? WHERE id = ?''',
                     (json.dumps(c.serialize()), self.user_id))
         con.commit()
-        self.game_state = GameState(c)
+        world = worldgen.generate_world()
+        self.game_state = GameState(c, world)
 
         return {
             "character": c.serialize(),
-            "world": worldgen.generate_world()
+            "world": worldgen.sign(world)
         }
 
     def character(self):

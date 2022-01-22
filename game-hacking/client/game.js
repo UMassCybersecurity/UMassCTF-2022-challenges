@@ -441,7 +441,11 @@ const TILES = [
     load_image("floor.grass.grass_0_old"),
     load_image("floor.grass.grass_1_old"),
     load_image("floor.grass.grass_2_old"),
+    load_image("floor.grass.grass0-dirt-mix_3"),
+    load_image("wall.brick_brown_0"),
+    load_image("floor.rect_gray_1_old"),
 ];
+console.log(TILES);
 
 const TITLE_COLOR = ["#ff3b00", "#ff5c00", "#ff8400", "#ffa500", "#ffbf00", "#ffe000", "#ffed00"];
 const MAPLE = ["::::    ::::      :::     :::::::::  :::        ::::::::::",
@@ -644,7 +648,10 @@ function renderViewport() {
             let worldY = y + cameraY;
             if (worldY >= 0 && worldY < worldHeight && worldX >= 0 && worldX < worldWidth) {
                 let tile_id = tileMap[worldY][worldX];
-                ctx.drawImage(TILES[tile_id], x * tileWidth, y * tileHeight);
+                // Treat 0 as nothing.
+                if (tile_id != 0) {
+                    ctx.drawImage(TILES[tile_id], x * tileWidth, y * tileHeight);
+                }
             }
             //
         }
@@ -854,7 +861,14 @@ async function handleKeyDownGame(e) {
                     }
                 }
                 break;
-
+            case "move_mob":
+                for (let i = 0; i < GAME_STATE.mobs.length; i++) {
+                    if (GAME_STATE.mobs[i].id === update.id) {
+                        GAME_STATE.mobs[i].position = update.new_position;
+                        break;
+                    }
+                }
+                break;
             case "message":
                 log(update.text);
                 break;

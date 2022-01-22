@@ -1,4 +1,10 @@
+import math
 import uuid
+
+
+def distance(a, b):
+    return math.sqrt((a["x"] - b["x"]) ** 2 + (a["y"] - b["y"]) ** 2)
+
 
 class Entity(object):
     def __init__(self, x, y):
@@ -27,11 +33,28 @@ class Entity(object):
         }
 
 
+class Decoration(Entity):
+    def __init__(self, view, x, y):
+        super().__init__(x, y)
+        self.view = view
+
+    def can_interact(self):
+        return False
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "position": self.position,
+            "world_view": self.view,
+            "type": self.type(),
+        }
+
+
 class Pickup(Entity):
     def __init__(self, item, x, y):
         super().__init__(x, y)
         self.item = item
-    
+
     def can_interact(self):
         return False
 
@@ -102,6 +125,33 @@ class Enemy(Entity):
             ]
         return base
 
+    def tick(self, game_state):
+        # FIXME: This should be pathfinding.
+        # FIXME: Should be 30, not 3
+        dist = distance(self.position, game_state.position)
+        if dist >= 30:
+            return []
+        elif dist < 2:
+            return game_state.character.receive_attack(None, self)
+        else:
+            dx, dy = (0, 0)
+            if self.position["x"] > game_state.position["x"]:
+                dx = -1
+            elif self.position["x"] < game_state.position["x"]:
+                dx = 1
+            if self.position["y"] > game_state.position["y"]:
+                dy = -1
+            elif self.position["y"] < game_state.position["y"]:
+                dy = 1
+            self.position["x"] += dx
+            self.position["y"] += dy
+            return [
+                {
+                    "type": "move_mob",
+                    "id": self.id,
+                    "new_position": self.position
+                }
+            ]
 
     def serialize(self):
         return super().serialize()

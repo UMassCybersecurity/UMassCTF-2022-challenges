@@ -131,7 +131,7 @@ class GameState(object):
         self.character = character
         self.world = world
         self.current_world = "grasslands"
-        self.position = { "x": 0, "y": 0 }
+        self.position = { "x": 8, "y": 8 }
         self.deltas = [{ "type": "new_mob", "entity": mob.serialize() } for mob in self.mobs()]
 
     def tilemap(self):
@@ -196,7 +196,7 @@ class GameState(object):
             events = entity.interact(self)
             events = self.process_events(events)
             self.deltas += events
-        else:
+        elif worldgen.walkable_surface(self.tilemap()[anticipated["y"]][anticipated["x"]]):
             self.position = anticipated
 
     def find_entity(self, x, y):

@@ -1,6 +1,8 @@
 import math
 import uuid
 
+import worldgen
+
 
 def distance(a, b):
     return math.sqrt((a["x"] - b["x"]) ** 2 + (a["y"] - b["y"]) ** 2)
@@ -104,6 +106,74 @@ class Corpse(Entity):
         return base
 
 
+# Code for A* gently lifted from the following article:
+# <https://www.redblobgames.com/pathfinding/a-star/implementation.html>
+#
+# Slight modifications made, hard-coding the structure of our specific graph.
+
+def heuristic(a, b) -> float:
+    (x1, y1) = a
+    (x2, y2) = b
+    return abs(x1 - x2) + abs(y1 - y2)
+
+from queue import PriorityQueue
+
+def a_star_search(graph, start, goal):
+    start = (start["x"], start["y"])
+    goal  = (goal["x"], goal["y"])
+    def neighbors(position):
+        x, y = position
+        res = []
+        if worldgen.walkable_surface(graph[y - 1][x - 1]):
+            res.append((x - 1, y - 1))
+        if worldgen.walkable_surface(graph[y    ][x - 1]):
+            res.append((x - 1, y    ))
+        if worldgen.walkable_surface(graph[y + 1][x - 1]):
+            res.append((x - 1, y + 1))
+        if worldgen.walkable_surface(graph[y - 1][x    ]):
+            res.append((x    , y - 1))
+        if worldgen.walkable_surface(graph[y + 1][x    ]):
+            res.append((x    , y + 1))
+        if worldgen.walkable_surface(graph[y - 1][x + 1]):
+            res.append((x + 1, y - 1))
+        if worldgen.walkable_surface(graph[y    ][x + 1]):
+            res.append((x + 1, y    ))
+        if worldgen.walkable_surface(graph[y + 1][x + 1]):
+            res.append((x + 1, y + 1))
+        return res
+    
+    frontier = PriorityQueue()
+    frontier.put(start, 0)
+    came_from = {}
+    cost_so_far = {}
+    came_from[start] = None
+    cost_so_far[start] = 0
+    
+    while not frontier.empty():
+        current = frontier.get()
+        
+        if current == goal:
+            break
+        
+        for next in neighbors(current):
+            new_cost = cost_so_far[current] + 1
+            if new_cost >= 10:
+                continue
+            if next not in cost_so_far or new_cost < cost_so_far[next]:
+                cost_so_far[next] = new_cost
+                priority = new_cost + heuristic(next, goal)
+                frontier.put(next, priority)
+                came_from[next] = current
+
+    # Walk back.
+    cur = goal
+    while came_from[cur] != start:
+        cur = came_from[cur]
+    return { "x": cur[0], "y": cur[1] }
+    
+    # return came_from, cost_so_far
+
+
 class Enemy(Entity):
     def __init__(self, x, y):
         super().__init__(x, y)
@@ -126,32 +196,24 @@ class Enemy(Entity):
         return base
 
     def tick(self, game_state):
-        # FIXME: This should be pathfinding.
-        # FIXME: Should be 30, not 3
         dist = distance(self.position, game_state.position)
-        if dist >= 30:
+        if dist >= 10:
             return []
         elif dist < 2:
             return game_state.character.receive_attack(None, self)
         else:
-            dx, dy = (0, 0)
-            if self.position["x"] > game_state.position["x"]:
-                dx = -1
-            elif self.position["x"] < game_state.position["x"]:
-                dx = 1
-            if self.position["y"] > game_state.position["y"]:
-                dy = -1
-            elif self.position["y"] < game_state.position["y"]:
-                dy = 1
-            self.position["x"] += dx
-            self.position["y"] += dy
-            return [
-                {
-                    "type": "move_mob",
-                    "id": self.id,
-                    "new_position": self.position
-                }
-            ]
+            try:
+                first_step = a_star_search(game_state.tilemap(), self.position, game_state.position)
+                self.position = first_step
+                return [
+                    {
+                        "type": "move_mob",
+                        "id": self.id,
+                        "new_position": first_step
+                    }
+                ]
+            except Exception:
+                return []
 
     def serialize(self):
         return super().serialize()

@@ -5,6 +5,7 @@ import asyncio
 import copy
 import hashlib
 import json
+import math
 import random
 import re
 import secrets
@@ -125,6 +126,11 @@ class Character(object):
             { "type": "message", "text": f"The {mob.type()} strikes!" },
         ]
 
+
+def distance(a, b):
+    return math.sqrt((a["x"] - b["x"]) ** 2 + (a["y"] - b["y"]) ** 2)
+
+
 class GameState(object):
     """All-encompassing state object for a session of the game."""
     def __init__(self, character, world):
@@ -147,7 +153,6 @@ class GameState(object):
 
     def delete_mob(self, id):
         for i, mob in enumerate(self.mobs()):
-            print(i, mob, id)
             if mob.id == id:
                 return self.mobs().pop(i)
 
@@ -287,6 +292,42 @@ class GameState(object):
         ])
         self.deltas += events
 
+    def throw_item(self, id):
+        def nearest_neighbor():
+            nearest = None
+            min_distance = 0
+            for mob in self.mobs():
+                if isinstance(mob, entity.Enemy) and (nearest is None or distance(self.position, mob.position) < min_distance):
+                    nearest = mob
+                    min_distance = distance(self.position, mob.position)
+            return nearest
+        idx = self.find_item(id)
+        item = self.character.inventory.pop(idx)
+        events = self.process_events([
+            { "type": "message", "text": f"You throw the {item.type()}" },
+        ])
+        self.deltas += events
+        target = nearest_neighbor()
+        start_x_offset = 0
+        start_y_offset = 0
+        if target.position["x"] > self.position["x"]:
+            start_x_offset = 1
+        elif target.position["x"] < self.position["x"]:
+            start_x_offset = -1
+        if target.position["y"] > self.position["y"]:
+            start_y_offset = 1
+        elif target.position["y"] < self.position["y"]:
+            start_y_offset = -1
+        projectile = entity.Projectile(
+            target.position["x"],
+            target.position["y"],
+            5,
+            item.icon(),
+            self.position["x"] + start_x_offset,
+            self.position["y"] + start_y_offset
+        )
+        self.mobs().append(projectile)
+
     def queue_updates(self):
         deltas = self.deltas
         self.deltas = []
@@ -302,7 +343,7 @@ class GameState(object):
             enemy_count += 1
         for ent in self.mobs():
             if hasattr(ent, "tick"):
-                deltas += ent.tick(self)
+                deltas += self.process_events(ent.tick(self))
         return [
             { "type": "update_position", "x": self.position["x"], "y": self.position["y"] },
         ] + deltas
@@ -440,6 +481,7 @@ EXPECTED_FIELDS = {
     "equip_item": ["id"],
     "unequip_item": ["id"],
     "consume_item": ["id"],
+    "throw_item": ["id"],
 }
 
 
@@ -482,6 +524,9 @@ def handle_client_packet(message):
     elif packet_type == "consume_item" and validate_fields(message, "consume_item"):
         del message["type"]
         return lambda x: Connection.game_action(x, GameState.consume_item, message)
+    elif packet_type == "throw_item" and validate_fields(message, "throw_item"):
+        del message["type"]
+        return lambda x: Connection.game_action(x, GameState.throw_item, message)
     else:
         return lambda x: { "error": "Unknown packet." }
 

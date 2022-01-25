@@ -782,7 +782,7 @@ async function handleKeyDownInventoryMode(e) {
     // world updates are slightly more complicated.
     case "e":
         {
-            const idx = GAME_STATE.inventory.selected;            
+            const idx = GAME_STATE.inventory.selected;
             const item = GAME_STATE.character.inventory[idx];
             response = await queuePacket({
                 "type": "equip_item",
@@ -801,7 +801,7 @@ async function handleKeyDownInventoryMode(e) {
         break;
     case "c":
         {
-            const idx = GAME_STATE.inventory.selected;            
+            const idx = GAME_STATE.inventory.selected;
             const item = GAME_STATE.character.inventory[idx];
             response = await queuePacket({
                 "type": "consume_item",
@@ -813,7 +813,14 @@ async function handleKeyDownInventoryMode(e) {
             GAME_STATE.character.inventory.splice(idx, 1);
         }
         break;
-
+    case "t":
+        const idx = GAME_STATE.inventory.selected;
+        const item = GAME_STATE.character.inventory[idx];
+        response = await queuePacket({
+            "type": "throw_item",
+            "id": item.id
+        });
+        GAME_STATE.character.inventory.splice(idx, 1);
     case "Escape":
         GAME_STATE.mode = "movement";
         break;
@@ -869,6 +876,16 @@ async function handleKeyDownGame(e) {
                     }
                 }
                 break;
+            case "move_mob_animate":
+                for (let i = 0; i < GAME_STATE.mobs.length; i++) {
+                    if (GAME_STATE.mobs[i].id === update.id) {
+                        GAME_STATE.mobs[i].position = update.new_position;
+                        break;
+                    }
+                }
+                await wait(50);
+                renderViewport();
+                break;
             case "message":
                 log(update.text);
                 break;
@@ -878,6 +895,9 @@ async function handleKeyDownGame(e) {
     renderViewport();
 }
 
+function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 const canvasLeft = canvas.offsetLeft + canvas.clientLeft;
 const canvasTop = canvas.offsetTop + canvas.clientTop;

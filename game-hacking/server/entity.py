@@ -35,6 +35,61 @@ class Entity(object):
         }
 
 
+class Projectile(Entity):
+    def __init__(self, target_x, target_y, damage, view, x, y):
+        super().__init__(x, y)
+        self.view = view
+        self.target_x = target_x
+        self.target_y = target_y
+        self.damage = damage
+
+    def can_interact(self):
+        return False
+
+    def tick(self, game_state):
+        max_steps = 10
+        # angle = math.atan((self.target_y - self.y) / (self.target_x - self.x))
+        azimuth_dx = (self.target_x - self.position["x"])
+        azimuth_dy = (self.target_y - self.position["y"])
+        normalizer = max(abs(azimuth_dx), abs(azimuth_dy))
+        if normalizer > 1:
+            azimuth_dx /= normalizer
+            azimuth_dy /= normalizer
+        base = [
+            { "type": "new_mob", "entity": self.serialize() }
+        ]
+        while max_steps > 0:
+            projected_x = round(self.position["x"] + azimuth_dx)
+            projected_y = round(self.position["y"] + azimuth_dy)
+            if not worldgen.walkable_surface(game_state.tilemap()[projected_y][projected_x]):
+                break
+            elif game_state.find_entity(projected_x, projected_y):
+                ent = game_state.find_entity(projected_x, projected_y)
+                if ent.can_interact():
+                    base += ent.interact(game_state)
+                break
+            self.position["x"] = projected_x
+            self.position["y"] = projected_y
+            base.append({
+                "type": "move_mob_animate",
+                "id": self.id,
+                "new_position": dict(self.position)
+            })
+            max_steps -= 1
+        base.append({ "type": "delete_mob", "id": self.id })
+        game_state.delete_mob(self.id)
+        return base
+    # TODO: Need to process resultant effects
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "position": { "x": round(self.position["x"]), "y": round(self.position["y"]) },
+            "world_view": self.view,
+            "type": self.type(),
+        }
+
+
 class Decoration(Entity):
     def __init__(self, view, x, y):
         super().__init__(x, y)
@@ -141,20 +196,20 @@ def a_star_search(graph, start, goal):
         if worldgen.walkable_surface(graph[y + 1][x + 1]):
             res.append((x + 1, y + 1))
         return res
-    
+
     frontier = PriorityQueue()
     frontier.put(start, 0)
     came_from = {}
     cost_so_far = {}
     came_from[start] = None
     cost_so_far[start] = 0
-    
+
     while not frontier.empty():
         current = frontier.get()
-        
+
         if current == goal:
             break
-        
+
         for next in neighbors(current):
             new_cost = cost_so_far[current] + 1
             if new_cost >= 10:
@@ -170,7 +225,7 @@ def a_star_search(graph, start, goal):
     while came_from[cur] != start:
         cur = came_from[cur]
     return { "x": cur[0], "y": cur[1] }
-    
+
     # return came_from, cost_so_far
 
 

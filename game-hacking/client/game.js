@@ -4,21 +4,236 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext('2d');
 
 // ---
+
+/*
+Copyright (c) 2011, Daniel Guerrero
+All rights reserved.
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL DANIEL GUERRERO BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+/*
+ * Uses the new array typed in javascript to binary base64 encode/decode
+ * at the moment just decodes a binary base64 encoded
+ * into either an ArrayBuffer (decodeArrayBuffer)
+ * or into an Uint8Array (decode)
+ *
+ * References:
+ * https://developer.mozilla.org/en/JavaScript_typed_arrays/ArrayBuffer
+ * https://developer.mozilla.org/en/JavaScript_typed_arrays/Uint8Array
+ */
+
+/*
+MIT License
+Copyright (c) 2020 Egor Nepomnyaschih
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+/*
+// This constant can also be computed with the following algorithm:
+const base64abc = [],
+    A = "A".charCodeAt(0),
+    a = "a".charCodeAt(0),
+    n = "0".charCodeAt(0);
+for (let i = 0; i < 26; ++i) {
+    base64abc.push(String.fromCharCode(A + i));
+}
+for (let i = 0; i < 26; ++i) {
+    base64abc.push(String.fromCharCode(a + i));
+}
+for (let i = 0; i < 10; ++i) {
+    base64abc.push(String.fromCharCode(n + i));
+}
+base64abc.push("+");
+base64abc.push("/");
+*/
+const base64abc = [
+    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+    "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
+    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "+", "/"
+];
+
+/*
+// This constant can also be computed with the following algorithm:
+const l = 256, base64codes = new Uint8Array(l);
+for (let i = 0; i < l; ++i) {
+    base64codes[i] = 255; // invalid character
+}
+base64abc.forEach((char, index) => {
+    base64codes[char.charCodeAt(0)] = index;
+});
+base64codes["=".charCodeAt(0)] = 0; // ignored anyway, so we just need to prevent an error
+*/
+const base64codes = [
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 62, 255, 255, 255, 63,
+    52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 255, 255, 255, 0, 255, 255,
+    255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+    15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 255, 255, 255, 255, 255,
+    255, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+    41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51
+];
+
+function getBase64Code(charCode) {
+    if (charCode >= base64codes.length) {
+        throw new Error("Unable to parse base64 string.");
+    }
+    const code = base64codes[charCode];
+    if (code === 255) {
+        throw new Error("Unable to parse base64 string.");
+    }
+    return code;
+}
+
+function bytesToBase64(bytes) {
+    let result = '', i, l = bytes.length;
+    for (i = 2; i < l; i += 3) {
+        result += base64abc[bytes[i - 2] >> 2];
+        result += base64abc[((bytes[i - 2] & 0x03) << 4) | (bytes[i - 1] >> 4)];
+        result += base64abc[((bytes[i - 1] & 0x0F) << 2) | (bytes[i] >> 6)];
+        result += base64abc[bytes[i] & 0x3F];
+    }
+    if (i === l + 1) { // 1 octet yet to write
+        result += base64abc[bytes[i - 2] >> 2];
+        result += base64abc[(bytes[i - 2] & 0x03) << 4];
+        result += "==";
+    }
+    if (i === l) { // 2 octets yet to write
+        result += base64abc[bytes[i - 2] >> 2];
+        result += base64abc[((bytes[i - 2] & 0x03) << 4) | (bytes[i - 1] >> 4)];
+        result += base64abc[(bytes[i - 1] & 0x0F) << 2];
+        result += "=";
+    }
+    return result;
+}
+
+function base64ToBytes(str) {
+    if (str.length % 4 !== 0) {
+        throw new Error("Unable to parse base64 string.");
+    }
+    const index = str.indexOf("=");
+    if (index !== -1 && index < str.length - 2) {
+        throw new Error("Unable to parse base64 string.");
+    }
+    let missingOctets = str.endsWith("==") ? 2 : str.endsWith("=") ? 1 : 0,
+        n = str.length,
+        result = new Uint8Array(3 * (n / 4)),
+        buffer;
+    for (let i = 0, j = 0; i < n; i += 4, j += 3) {
+        buffer =
+            getBase64Code(str.charCodeAt(i)) << 18 |
+            getBase64Code(str.charCodeAt(i + 1)) << 12 |
+            getBase64Code(str.charCodeAt(i + 2)) << 6 |
+            getBase64Code(str.charCodeAt(i + 3));
+        result[j] = buffer >> 16;
+        result[j + 1] = (buffer >> 8) & 0xFF;
+        result[j + 2] = buffer & 0xFF;
+    }
+    return result.subarray(0, result.length - missingOctets);
+}
+
+// ---
 var TOKEN = null;
 var socket = new WebSocket('ws://localhost:8765');
+
+const SBOX = [
+    0x63,0x7c,0x77,0x7b,0xf2,0x6b,0x6f,0xc5,0x30,0x01,0x67,0x2b,0xfe,0xd7,0xab,0x76,
+    0xca,0x82,0xc9,0x7d,0xfa,0x59,0x47,0xf0,0xad,0xd4,0xa2,0xaf,0x9c,0xa4,0x72,0xc0,
+    0xb7,0xfd,0x93,0x26,0x36,0x3f,0xf7,0xcc,0x34,0xa5,0xe5,0xf1,0x71,0xd8,0x31,0x15,
+    0x04,0xc7,0x23,0xc3,0x18,0x96,0x05,0x9a,0x07,0x12,0x80,0xe2,0xeb,0x27,0xb2,0x75,
+    0x09,0x83,0x2c,0x1a,0x1b,0x6e,0x5a,0xa0,0x52,0x3b,0xd6,0xb3,0x29,0xe3,0x2f,0x84,
+    0x53,0xd1,0x00,0xed,0x20,0xfc,0xb1,0x5b,0x6a,0xcb,0xbe,0x39,0x4a,0x4c,0x58,0xcf,
+    0xd0,0xef,0xaa,0xfb,0x43,0x4d,0x33,0x85,0x45,0xf9,0x02,0x7f,0x50,0x3c,0x9f,0xa8,
+    0x51,0xa3,0x40,0x8f,0x92,0x9d,0x38,0xf5,0xbc,0xb6,0xda,0x21,0x10,0xff,0xf3,0xd2,
+    0xcd,0x0c,0x13,0xec,0x5f,0x97,0x44,0x17,0xc4,0xa7,0x7e,0x3d,0x64,0x5d,0x19,0x73,
+    0x60,0x81,0x4f,0xdc,0x22,0x2a,0x90,0x88,0x46,0xee,0xb8,0x14,0xde,0x5e,0x0b,0xdb,
+    0xe0,0x32,0x3a,0x0a,0x49,0x06,0x24,0x5c,0xc2,0xd3,0xac,0x62,0x91,0x95,0xe4,0x79,
+    0xe7,0xc8,0x37,0x6d,0x8d,0xd5,0x4e,0xa9,0x6c,0x56,0xf4,0xea,0x65,0x7a,0xae,0x08,
+    0xba,0x78,0x25,0x2e,0x1c,0xa6,0xb4,0xc6,0xe8,0xdd,0x74,0x1f,0x4b,0xbd,0x8b,0x8a,
+    0x70,0x3e,0xb5,0x66,0x48,0x03,0xf6,0x0e,0x61,0x35,0x57,0xb9,0x86,0xc1,0x1d,0x9e,
+    0xe1,0xf8,0x98,0x11,0x69,0xd9,0x8e,0x94,0x9b,0x1e,0x87,0xe9,0xce,0x55,0x28,0xdf,
+    0x8c,0xa1,0x89,0x0d,0xbf,0xe6,0x42,0x68,0x41,0x99,0x2d,0x0f,0xb0,0x54,0xbb,0x16
+];
+
+function serialize(data) {
+    let encoder = new TextEncoder();
+    let encoded = encoder.encode(JSON.stringify(data));
+    let choice = Math.floor(Math.random() * SBOX.length);
+    let nonce = SBOX[choice];
+    let key = nonce;
+    for (let i = 0; i < encoded.length; i++) {
+        encoded[i] ^= key;
+        key = SBOX[key];
+    }
+    let decoder = new TextDecoder();
+    let packet = new Uint8Array(encoded.length + 1);
+    packet[0] = nonce;
+    for (let i = 0; i < encoded.length; i++) {
+        packet[i+1] = encoded[i];
+    }
+    return bytesToBase64(packet);
+}
+
+function deserialize(chunk){
+    chunk = base64ToBytes(chunk);
+    let nonce = chunk[0];
+    let key = nonce;
+    chunk = chunk.slice(1);
+    for (let i = 0; i < chunk.length; i++) {
+        chunk[i] ^= key;
+        key = SBOX[key];
+    }
+    let decoder = new TextDecoder();
+    return JSON.parse(decoder.decode(chunk));
+}
 
 function initializeSocket(socket, reconnect) {
     socket.addEventListener('open', function (event) {
         if (reconnect && TOKEN !== null) {
-            socket.send(JSON.stringify({ "type": "reconnect", "token": TOKEN }));
+            socket.send(serialize({ "type": "reconnect", "token": TOKEN }));
         }
         promiseTracker.enabled = true;
         for (let key of Object.keys(promiseTracker.inFlight)) {
-            socket.send(JSON.stringify(promiseTracker.inFlight[key][2]));
+            socket.send(serialize(promiseTracker.inFlight[key][2]));
         }
     });
     socket.addEventListener('message', function (event) {
-        const response = JSON.parse(event.data);
+        if (event.data === {}) {
+            return;
+        }
+        const response = deserialize(event.data);
         if (response.hasOwnProperty("id")) {
             const messageId = response.id;
             promiseTracker.inFlight[messageId][0](response.data);
@@ -57,7 +272,7 @@ function queuePacket(data) {
                 console.log(padded);
                 promiseTracker.inFlight[id] = [resolve, reject, padded];
                 if (promiseTracker.enabled) {
-                    socket.send(JSON.stringify(padded));
+                    socket.send(serialize(padded));
                 }
             })
         }

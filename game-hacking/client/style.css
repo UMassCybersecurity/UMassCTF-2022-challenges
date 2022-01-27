@@ -1,0 +1,10 @@
+body {
+    background-image: url('assets/floor/demonic_red_1.png');
+}
+
+canvas {
+    display: block;
+    margin: auto;
+    margin-top: 2em;
+    border: 4px solid;
+}

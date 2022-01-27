@@ -653,6 +653,7 @@ const tileWidth = 32;
 const tileHeight = 32;
 const TILES = [
     load_image("floor.cobble_blood_10_new"),
+    load_image("water.deep_water"),
     load_image("floor.grass.grass_0_old"),
     load_image("floor.grass.grass_1_old"),
     load_image("floor.grass.grass_2_old"),
@@ -817,7 +818,7 @@ document.addEventListener('keydown', handleKeyDownMenu);
 const messageBuffer = [];
 function log(message) {
     messageBuffer.push(message);
-    if (messageBuffer.length >= 4) {
+    if (messageBuffer.length >= 8) {
         messageBuffer.shift();
     }
 }
@@ -855,7 +856,8 @@ function renderViewport() {
     const cameraX = playerPosition.x - viewportWidth / 2;
     const cameraY = playerPosition.y - viewportHeight / 2;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.font = '24px monospace';
     for (let y = 0; y < viewportHeight; y++) {
         for (let x = 0; x < viewportWidth; x++) {
@@ -863,10 +865,10 @@ function renderViewport() {
             let worldY = y + cameraY;
             if (worldY >= 0 && worldY < worldHeight && worldX >= 0 && worldX < worldWidth) {
                 let tile_id = tileMap[worldY][worldX];
-                // Treat 0 as nothing.
-                if (tile_id != 0) {
-                    ctx.drawImage(TILES[tile_id], x * tileWidth, y * tileHeight);
-                }
+                ctx.drawImage(TILES[tile_id + 1], x * tileWidth, y * tileHeight);
+            } else {
+                // Draw water.
+                ctx.drawImage(TILES[1], x * tileWidth, y * tileHeight);
             }
             //
         }
@@ -889,8 +891,12 @@ function renderViewport() {
     );
     ctx.font = '16px monospace';
     ctx.fillStyle = "#000000";
+    ctx.lineWidth = 4;
+    ctx.moveTo(0, viewportHeight * tileHeight);
+    ctx.lineTo(canvas.width, viewportHeight * tileHeight);
+    ctx.stroke();
     for (let y = 1; y < 1 + messageBuffer.length; y++) {
-        ctx.fillText(messageBuffer[y - 1], 0, viewportHeight * tileHeight + 16 * y);
+        ctx.fillText(messageBuffer[y - 1], 4, 2 + viewportHeight * tileHeight + 16 * y);
     }
 
     let line;

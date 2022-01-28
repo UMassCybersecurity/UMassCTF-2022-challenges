@@ -304,6 +304,6 @@ class Portal(Entity):
     def serialize(self):
         base = super().serialize()
         base.update({
-            "world_view": "⭕",
+            "world_view": "🕳️",
         })
         return base

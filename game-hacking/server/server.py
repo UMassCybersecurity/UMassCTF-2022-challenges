@@ -40,6 +40,164 @@ SIGN_MESSAGES = [
 ]
 
 
+CLASSES = {
+    "🧚": {
+        "name": "fairy",
+        "starting_stats": {
+            "max_health"   : 3,
+            "strength"     : 1,
+            "constitution" : 1,
+            "intelligence" : 3,
+            "initiative"   : 2,
+            "start_items"  : lambda: [],
+        }
+    },
+    "👩⚕️ ": {
+        "name": "medic",
+        "starting_stats": {
+            "max_health"   : 5,
+            "strength"     : 1,
+            "constitution" : 1,
+            "intelligence" : 3,
+            "initiative"   : 1,
+            "start_items"  : lambda: [inventory.Bandaid()],
+        }
+    },
+    "👨🏭": {
+        "name": "pyro",
+        "starting_stats": {
+            "max_health"   : 6,
+            "strength"     : 2,
+            "constitution" : 1,
+            "intelligence" : 1,
+            "initiative"   : 1,
+            "start_items"  : lambda: [inventory.Torch()],
+        }
+    },
+    "🥷": {
+        "name": "ninja",
+        "starting_stats": {
+            "max_health"   : 4,
+            "strength"     : 2,
+            "constitution" : 2,
+            "intelligence" : 1,
+            "initiative"   : 3,
+            "start_items"  : lambda: [],
+        }
+    },
+    "🧙": {
+        "name": "subway panhandler",
+        "starting_stats": {
+            "max_health"   : 6,
+            "strength"     : 1,
+            "constitution" : 5,
+            "intelligence" : 1,
+            "initiative"   : 1,
+            "start_items"  : lambda: [inventory.Fentanyl()],
+        }
+    },
+    "🤡": {
+        "name": "clown",
+        "starting_stats": {
+            "max_health"   : 3,
+            "strength"     : 1,
+            "constitution" : 1,
+            "intelligence" : 1,
+            "initiative"   : 5,
+            "start_items"  : lambda: [inventory.Axe()],
+        }
+    },
+    "👽": {
+        "name": "alien",
+        "starting_stats": {
+            "max_health"   : 8,
+            "strength"     : 1,
+            "constitution" : 1,
+            "intelligence" : 1,
+            "initiative"   : 1,
+            "start_items"  : lambda: [inventory.Raygun()],
+        }
+    },
+    "🦝": {
+        "name": "raccoon",
+        "starting_stats": {
+            "max_health"   : 3,
+            "strength"     : 2,
+            "constitution" : 5,
+            "intelligence" : 1,
+            "initiative"   : 5,
+            "start_items"  : lambda: [],
+        }
+    },
+    "🦖": {
+        "name": "t-rex",
+        "starting_stats": {
+            "max_health"   : 10,
+            "strength"     : 10,
+            "constitution" : 5,
+            "intelligence" : 1,
+            "initiative"   : 3,
+            "start_items"  : lambda: [],
+        }
+    },
+    "👨🌾": {
+        "name": "farmer",
+        "starting_stats": {
+            "max_health"   : 3,
+            "strength"     : 1,
+            "constitution" : 1,
+            "intelligence" : 1,
+            "initiative"   : 1,
+            "start_items"  : lambda: [inventory.Banjo()],
+        }
+    },
+    "👯": {
+        "name": "dynamic duo",
+        "starting_stats": {
+            "max_health"   : 6,
+            "strength"     : 5,
+            "constitution" : 1,
+            "intelligence" : 3,
+            "initiative"   : 2,
+            "start_items"  : lambda: [],
+        }
+    },
+    "🏋️": {
+        "name": "tank",
+        "starting_stats": {
+            "max_health"   : 10,
+            "strength"     : 10,
+            "constitution" : 8,
+            "intelligence" : 1,
+            "initiative"   : 1,
+            "start_items"  : lambda: [],
+        }
+    },
+    "🧜": {
+        "name": "fish",
+        "starting_stats": {
+            "max_health"   : 1,
+            "strength"     : 1,
+            "constitution" : 1,
+            "intelligence" : 1,
+            "initiative"   : 1,
+            "start_items"  : lambda: [],
+        }
+    },
+    "🤠": {
+        "name": "post malone",
+        "starting_stats": {
+            "max_health"   : 3,
+            "strength"     : 1,
+            "constitution" : 1,
+            "intelligence" : 3,
+            "initiative"   : 1,
+            "start_items"  : lambda: [inventory.BudLite() for _ in range(5)]
+        }
+    }
+}
+
+
 class Character(object):
     def __init__(self):
         self.equipped = []
@@ -52,20 +210,19 @@ class Character(object):
         self.alliance_order = template["order"]
         self.morality       = template["morality"]
 
+        self.max_health   = CLASSES[self.alliance_class]["starting_stats"]["max_health"]
+        self.strength     = CLASSES[self.alliance_class]["starting_stats"]["strength"]
+        self.constitution = CLASSES[self.alliance_class]["starting_stats"]["constitution"]
+        self.intelligence = CLASSES[self.alliance_class]["starting_stats"]["intelligence"]
+        self.initiative   = CLASSES[self.alliance_class]["starting_stats"]["initiative"]
+        self.inventory    = CLASSES[self.alliance_class]["starting_stats"]["start_items"]()
         self.level        = 0
-        self.max_health   = 3
-        self.health       = 3
-        self.strength     = 1
-        self.constitution = 1
-        self.intelligence = 1
-        self.initiative   = 1
+        self.health       = self.max_health
 
         bonus_item = re.findall(r". (.*) \(.*\)", template["bonus"])[0]
         bonus_item = inventory.deserialize({ "type": bonus_item })
-        if bonus_item is None:
-            self.inventory = []
-        else:
-            self.inventory = [bonus_item]
+        if bonus_item is not None:
+            self.inventory.append(bonus_item)
         return self
 
     def deserialize(serialized):

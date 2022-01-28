@@ -57,14 +57,37 @@ class Purse(Weapon):
     def icon(self):
         return "👝"
 
+class Torch(Weapon):
+    def icon(self):
+        return "🪔"
+
+class Axe(Weapon):
+    def icon(self):
+        return "🪓"
+
+class Raygun(Weapon):
+    def icon(self):
+        return "📡"
+
 class Bandaid(Consumable):
     def icon(self):
         return "🩹"
+
+class Fentanyl(Consumable):
+    def icon(self):
+        return "💊"
+
+class BudLite(Consumable):
+    def icon(self):
+        return "🍺"
 
 class Guitar(Usable):
     def icon(self):
         return "🎸"
 
+class Banjo(Usable):
+    def icon(self):
+        return "🪕"
 
 class Aphrodisiac(Consumable):
     def icon(self):

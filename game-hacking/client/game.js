@@ -896,7 +896,7 @@ function renderViewport() {
         }
     }
     ctx.fillText(
-        '🥷',
+        GAME_STATE.character["class"],
         (viewportWidth / 2) * tileWidth + 4,
         (viewportHeight / 2) * tileHeight + 24
     );

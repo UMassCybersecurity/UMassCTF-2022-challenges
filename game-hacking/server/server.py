@@ -48,7 +48,7 @@ class Character(object):
         self = Character()
         self.name           = template["name"]
         self.age            = template["age"]
-        self.alliance_class = template["class"]
+        self.alliance_class = template["class"].split(" ")[0]
         self.alliance_order = template["order"]
         self.morality       = template["morality"]
 
@@ -168,6 +168,15 @@ class GameState(object):
                 })
             elif event["type"] == "delete_mob":
                 self.delete_mob(event["id"])
+                processed.append(event)
+            elif event["type"] == "teleport_player":
+                self.current_world = event["target_world"]
+                self.position["x"] = event["target_x"]
+                self.position["y"] = event["target_y"]
+                processed.append({
+                    "type": "update_world",
+                    "world": worldgen.sign(self.world)
+                })
                 processed.append(event)
             else:
                 processed.append(event)

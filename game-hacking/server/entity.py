@@ -281,3 +281,29 @@ class Zombie(Enemy):
             "world_view": "🧟",
         })
         return base
+
+
+class Portal(Entity):
+    def __init__(self, target_world, target_x, target_y, x, y):
+        super().__init__(x, y)
+        self.target_world = target_world
+        self.target_x = target_x
+        self.target_y = target_y
+
+    def interact(self, game_state):
+        return [
+            { "type": "message", "text": "You enter the wormhole..." },
+            {
+                "type": "teleport_player",
+                "target_x": self.target_x,
+                "target_y": self.target_y,
+                "target_world": self.target_world
+            }
+        ]
+
+    def serialize(self):
+        base = super().serialize()
+        base.update({
+            "world_view": "⭕",
+        })
+        return base

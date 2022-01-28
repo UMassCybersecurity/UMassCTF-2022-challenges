@@ -207,6 +207,7 @@ function serialize(data) {
 }
 
 function deserialize(chunk){
+    console.log(chunk);
     chunk = base64ToBytes(chunk);
     let nonce = chunk[0];
     let key = nonce;
@@ -660,6 +661,12 @@ const TILES = [
     load_image("floor.grass.grass0-dirt-mix_3"),
     load_image("wall.brick_brown_0"),
     load_image("floor.rect_gray_1_old"),
+    load_image("floor.sand_1"),
+    load_image("floor.sand_2"),
+    load_image("floor.sand_3"),
+    load_image("floor.sand_4"),
+    load_image("floor.sandstone_floor_1"),
+    load_image("wall.sandstone_wall_0"),
 ];
 console.log(TILES);
 
@@ -844,6 +851,10 @@ const GAME_STATE = {
     "loadWorld": function (name) {
         const object = JSON.parse(atob(JSON.parse(window.localStorage.getItem('world')).blob));
         this.tileMap = object["tilemaps"][name];
+        this.mobs = [];
+        for (let mob of object["mobs"][name]) {
+            this.mobs.push({ ...mob});
+        }
     }
 }
 
@@ -1069,7 +1080,16 @@ async function handleKeyDownGame(e) {
                 GAME_STATE.position.y = update.y;
                 break;
             case "new_mob":
-                GAME_STATE.mobs.push(update.entity);
+                // Make sure this isn't a duplicate.
+                let sentinel = false;
+                for (let mob of GAME_STATE.mobs) {
+                    if (mob.id === update.entity.id) {
+                        sentinel = true;
+                    }
+                }
+                if (!sentinel) {
+                    GAME_STATE.mobs.push(update.entity);
+                }
                 break;
             case "new_item":
                 GAME_STATE.character.inventory.push(update.item);
@@ -1109,6 +1129,12 @@ async function handleKeyDownGame(e) {
                 break;
             case "message":
                 log(update.text);
+                break;
+            case "teleport_player":
+                GAME_STATE.loadWorld(update.target_world)
+                break;
+            case "update_world":
+                window.localStorage.setItem('world', JSON.stringify(update.world));
                 break;
             }
         }

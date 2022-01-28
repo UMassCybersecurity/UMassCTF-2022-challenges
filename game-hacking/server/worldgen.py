@@ -11,13 +11,20 @@ import entity
 import inventory
 
 class Tile(Enum):
-    NOTHING = 0
-    GRASS0  = 1
-    GRASS1  = 2
-    GRASS2  = 3
-    GRASS3  = 4
-    WALL    = 5
-    FLOOR   = 6
+    NOTHING        = 0
+    GRASS0         = 1
+    GRASS1         = 2
+    GRASS2         = 3
+    GRASS3         = 4
+    WALL           = 5
+    FLOOR          = 6
+    SAND0          = 7
+    SAND1          = 8
+    SAND2          = 9
+    SAND3          = 10
+    SANDSTONE      = 11
+    SANDSTONE_WALL = 12
+    
 
 
 SECRET_KEY = b"1f_y0u'r3_r34d1ng_7h15,_1_h0p3_17'5_b3c4u53_y0u_unr0113d_MD5,_n07_b3c4u53_y0u_g07_RCE_0n_7h3_53rv3r"
@@ -37,13 +44,16 @@ SECRET_KEY = b"1f_y0u'r3_r34d1ng_7h15,_1_h0p3_17'5_b3c4u53_y0u_unr0113d_MD5,_n07
 def walkable_surface(surf):
     return surf in map(lambda x: x.value, [
         Tile.GRASS0, Tile.GRASS1, Tile.GRASS2, Tile.GRASS3,
-        Tile.FLOOR
+        Tile.FLOOR,
+        Tile.SAND0, Tile.SAND1, Tile.SAND2, Tile.SAND3,
+        Tile.SANDSTONE
     ])
 
 
 def natural_surface(surf):
     return surf in map(lambda x: x.value, [
-        Tile.GRASS0, Tile.GRASS1, Tile.GRASS2, Tile.GRASS3
+        Tile.GRASS0, Tile.GRASS1, Tile.GRASS2, Tile.GRASS3,
+        Tile.SAND0, Tile.SAND1, Tile.SAND2, Tile.SAND3
     ])
 
 
@@ -123,7 +133,7 @@ def generate_map(description):
             world[y][x] = wall
         buildings_queued -= 1
 
-    entities = [entity.Sign(5, 5), entity.Zombie(4, 4), entity.Pickup(inventory.Bandaid(), 3, 4)]
+    entities = [entity.Sign(5, 5), entity.Zombie(4, 4), entity.Pickup(inventory.Bandaid(), 3, 4), entity.Portal("desert", 4, 4, 8, 8)]
     environmental_queued = random.randint(30, 50)
     while environmental_queued > 0:
         x = random.randint(1, 126)
@@ -158,18 +168,22 @@ def generate_world():
         "building-floor": [Tile.FLOOR],
         "decorations": "🌲🌳🌿🌹🌷🌱"
     })
+    desert_mobs, desert_tiles = generate_map({
+        "bounding-wall": Tile.WALL,
+        "ground": [Tile.SAND0, Tile.SAND1, Tile.SAND2, Tile.SAND3],
+        "building-wall": [Tile.SANDSTONE_WALL],
+        "building-floor": [Tile.SANDSTONE],
+        "decorations": "🌾🌴🌵"
+    })
     return {
-        "portals": [
-            # { id: UUID(...), destination_world: "desert", destination_position: (x, y) }
-        ],
         "tilemaps": {
             "grasslands": grassland_tiles,
-            # "desert"
+            "desert": desert_tiles,
             # "snowland"
         },
         "mobs": {
             "grasslands": grassland_mobs,
-            # "desert"
+            "desert": desert_mobs,
             # "snowland"
         }
     }
@@ -177,11 +191,10 @@ def generate_world():
 
 def sign(world):
     world = {
-        "portals": world["portals"],
         "tilemaps": world["tilemaps"],
         "mobs": {
             "grasslands": [mob.serialize() for mob in world["mobs"]["grasslands"]],
-            # "desert"
+            "desert": [mob.serialize() for mob in world["mobs"]["desert"]],
             # "snowland"
         }
     }

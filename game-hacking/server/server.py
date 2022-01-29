@@ -330,6 +330,10 @@ class GameState(object):
                 self.current_world = event["target_world"]
                 self.position["x"] = event["target_x"]
                 self.position["y"] = event["target_y"]
+                if event["target_world"].startswith("maze"):
+                    maze_mobs, maze_tiles = worldgen.generate_maze(int(event["target_world"][-1]))
+                    self.world["tilemaps"][event["target_world"]] = maze_tiles
+                    self.world["mobs"][event["target_world"]] = maze_mobs
                 processed.append({
                     "type": "update_world",
                     "world": worldgen.sign(self.world)

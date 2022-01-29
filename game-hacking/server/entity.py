@@ -307,3 +307,23 @@ class Portal(Entity):
             "world_view": "🕳️",
         })
         return base
+
+
+class CorrectHorseBatteryAward(Entity):
+    def interact(self, game_state):
+        return [
+            { "type": "message", "text": "Congrats! Flag is UMASS{[flag here]}" },
+            {
+                "type": "teleport_player",
+                "target_x": 1,
+                "target_y": 1,
+                "target_world": "grasslands"
+            }
+        ]
+
+    def serialize(self):
+        base = super().serialize()
+        base.update({
+            "world_view": "🏆",
+        })
+        return base

@@ -57,6 +57,65 @@ def natural_surface(surf):
     ])
 
 
+def generate_maze(n):
+    world = []
+    entities = [entity.Portal("grasslands", 5, 5, 1, 1)]
+    for y in range(127):
+        world.append([])
+        for x in range(127):
+            world[y].append(Tile.WALL.value)
+    
+    for y in range(127):
+        for x in range(127):
+            if y % 2 == 1 and x % 2 == 1:
+                world[y][x] = Tile.FLOOR.value
+    
+    def walls_of_point(x, y):
+        walls = []
+        if x - 1 != 0:
+            walls.append(((x - 1, y), (x - 2, y)))
+        if x + 1 != 126:
+            walls.append(((x + 1, y), (x + 2, y)))
+        if y - 1 != 0:
+            walls.append(((x, y - 1), (x, y - 2)))
+        if y + 1 != 126:
+            walls.append(((x, y + 1), (x, y + 2)))
+        return walls
+    
+    points = []
+    walls = []
+    while True:
+        x, y = (random.randint(0, 127), random.randint(0, 127))
+        if x % 2 == 1 and y % 2 == 1:
+            points.append((x, y))
+            walls += walls_of_point(x, y)
+            break
+    
+    while len(walls) > 0:
+        idx = random.randint(0, len(walls) - 1)
+        wall, neighbor = walls.pop(idx)
+        if neighbor in points:
+            continue
+        wx, wy = wall
+        world[wy][wx] = Tile.FLOOR.value
+        points.append(neighbor)
+        nx, ny = neighbor
+        walls += walls_of_point(nx, ny)
+
+    while True:
+        x, y = (random.randint(0, 127), random.randint(0, 127))
+        if x % 2 == 1 and y % 2 == 1 and x != 1 and y != 1:
+            # TODO: Small random chance of generating an "end" entity that will
+            # give you the flag.
+            if random.randint(1, 10) == 7:
+                entities.append(entity.CorrectHorseBatteryAward(x, y))
+            else:
+                entities.append(entity.Portal("maze2" if n == 1 else "maze1", 5, 5, x, y))
+            break
+
+    return entities, world
+
+
 def generate_map(description):
     world = []
     for i in range(128):
@@ -133,7 +192,7 @@ def generate_map(description):
             world[y][x] = wall
         buildings_queued -= 1
 
-    entities = [entity.Sign(5, 5), entity.Zombie(4, 4), entity.Pickup(inventory.Bandaid(), 3, 4), entity.Portal("desert", 4, 4, 8, 8)]
+    entities = [entity.Sign(5, 5), entity.Zombie(4, 4), entity.Pickup(inventory.Bandaid(), 3, 4), entity.Portal("desert", 4, 4, 8, 8), entity.Portal("maze1", 3, 3, 10, 10)]
     environmental_queued = random.randint(30, 50)
     while environmental_queued > 0:
         x = random.randint(1, 126)
@@ -190,6 +249,7 @@ def generate_world():
 
 
 def sign(world):
+    worldp = world
     world = {
         "tilemaps": world["tilemaps"],
         "mobs": {
@@ -198,6 +258,10 @@ def sign(world):
             # "snowland"
         }
     }
+    if "maze1" in worldp["mobs"]:
+        world["mobs"]["maze1"] = [mob.serialize() for mob in worldp["mobs"]["maze1"]]
+    if "maze2" in worldp["mobs"]:
+        world["mobs"]["maze2"] = [mob.serialize() for mob in worldp["mobs"]["maze2"]]
     encoded = b64encode(json.dumps(world).encode())
     signature = generate_signature(encoded)
     return {

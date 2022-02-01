@@ -1034,7 +1034,8 @@ async function handleKeyDownInventoryMode(e) {
                 "type": "equip_item",
                 "id": item.id
             });
-            if (response.length == 2 && response[1].text.includes("You cannot equip a")) {
+            if (response.map((x) => x.hasOwnProperty("text") && x.text.includes("You cannot equip a")).
+                reduce((a, b) => a || b, false)) {
                 break;
             }
             GAME_STATE.character.inventory.splice(idx, 1);
@@ -1053,7 +1054,9 @@ async function handleKeyDownInventoryMode(e) {
                 "type": "consume_item",
                 "id": item.id
             });
-            if (response.length == 2 && response[1].text.includes("You cannot eat a")) {
+
+            if (response.map((x) => x.hasOwnProperty("text") && x.text.includes("You cannot eat a"))
+                .reduce((a, b) => a || b, false)) {
                 break;
             }
             GAME_STATE.character.inventory.splice(idx, 1);

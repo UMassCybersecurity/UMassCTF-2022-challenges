@@ -507,6 +507,8 @@ class GameState(object):
             y = random.randint(1, 126)
             if not worldgen.walkable_surface(self.tilemap()[y][x]):
                 continue
+            if (x, y) in [(entity.position["x"], entity.position["y"]) for entity in self.mobs()]:
+                continue
             mob = entity.Zombie(x, y)
             self.mobs().append(mob)
             self.deltas.append({ "type": "new_mob", "entity": mob.serialize() })

@@ -199,6 +199,8 @@ def generate_map(description):
         y = random.randint(1, 126)
         if not natural_surface(world[y][x]):
             continue
+        if (x, y) in [(entity.position["x"], entity.position["y"]) for entity in entities]:
+            continue
         entities.append(entity.Decoration(random.choice(description["decorations"]), x, y))
         environmental_queued -= 1
 

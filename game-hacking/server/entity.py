@@ -1,3 +1,4 @@
+import copy
 import math
 import uuid
 
@@ -173,6 +174,10 @@ def heuristic(a, b) -> float:
 
 from queue import PriorityQueue
 
+def pre_process_tilemap(game_state, graph):
+    for mob in game_state.mobs():
+        graph[mob.position["y"]][mob.position["x"]] = worldgen.Tile.NOTHING.value
+
 def a_star_search(graph, start, goal):
     start = (start["x"], start["y"])
     goal  = (goal["x"], goal["y"])
@@ -258,7 +263,9 @@ class Enemy(Entity):
             return game_state.character.receive_attack(None, self)
         else:
             try:
-                first_step = a_star_search(game_state.tilemap(), self.position, game_state.position)
+                graph = copy.deepcopy(game_state.tilemap())
+                pre_process_tilemap(game_state, graph)
+                first_step = a_star_search(graph, self.position, game_state.position)
                 self.position = first_step
                 return [
                     {

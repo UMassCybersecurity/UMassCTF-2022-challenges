@@ -59,7 +59,7 @@ def natural_surface(surf):
 
 def generate_maze(n):
     world = []
-    entities = [entity.Portal("grasslands", 5, 5, 1, 1)]
+    entities = [entity.Portal(0, "grasslands", 5, 5, 1, 1)]
     for y in range(127):
         world.append([])
         for x in range(127):
@@ -110,7 +110,7 @@ def generate_maze(n):
             if random.randint(1, 10) == 7:
                 entities.append(entity.CorrectHorseBatteryAward(x, y))
             else:
-                entities.append(entity.Portal("maze2" if n == 1 else "maze1", 5, 5, x, y))
+                entities.append(entity.Portal(0, "maze2" if n == 1 else "maze1", 5, 5, x, y))
             break
 
     return entities, world

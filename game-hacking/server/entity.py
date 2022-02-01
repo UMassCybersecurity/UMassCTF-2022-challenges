@@ -284,13 +284,18 @@ class Zombie(Enemy):
 
 
 class Portal(Entity):
-    def __init__(self, target_world, target_x, target_y, x, y):
+    def __init__(self, minimum_level, target_world, target_x, target_y, x, y):
         super().__init__(x, y)
+        self.minimum_level = minimum_level
         self.target_world = target_world
         self.target_x = target_x
         self.target_y = target_y
 
     def interact(self, game_state):
+        if game_state.character.level < self.minimum_level:
+            return [
+                { "type": "message", "text": f"You are too weak! You need at least level {self.minimum_level}..." },
+            ]
         return [
             { "type": "message", "text": "You enter the wormhole..." },
             {

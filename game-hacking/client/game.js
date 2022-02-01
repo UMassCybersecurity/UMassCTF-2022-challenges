@@ -931,6 +931,17 @@ function renderViewport() {
             line = (GAME_STATE.inventory.selected == y - 1 ? "> " : "  ") + line;
             ctx.fillText(line, 0, tileHeight + 16 * y);
         }
+
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(canvas.width - 256, 0, 256, rectHeight + (64 + 32));
+        ctx.fillStyle = "#000000";
+        ctx.fillText(`name: ${GAME_STATE.character["name"]}`, canvas.width - 256, tileHeight + 16 * 0);
+        ctx.fillText(`age: ${GAME_STATE.character["age"]}`, canvas.width - 256, tileHeight + 16 * 1);
+        ctx.fillText(`hp: ${GAME_STATE.character["health"]}/${GAME_STATE.character["max_health"]}`, canvas.width - 256, tileHeight + 16 * 2);
+        ctx.fillText(`str: ${GAME_STATE.character["strength"]}`, canvas.width - 256, tileHeight + 16 * 3);
+        ctx.fillText(`con: ${GAME_STATE.character["constitution"]}`, canvas.width - 256, tileHeight + 16 * 4);
+        ctx.fillText(`dex: ${GAME_STATE.character["initiative"]}`, canvas.width - 256, tileHeight + 16 * 5);
     }
 }
 
@@ -1153,10 +1164,36 @@ async function handleKeyDownGame(e) {
             case "update_world":
                 window.localStorage.setItem('world', JSON.stringify(update.world));
                 break;
+            case "update_player":
+                GAME_STATE.character = update.entity;
+                break;
+            case "game_over":
+                GAME_STATE["character"] = null;
+                GAME_STATE["mode"] = "movement";
+                GAME_STATE["position"] = { "x": 0, "y": 0 };
+                GAME_STATE["inventory"] = { "selected": 0 };
+                GAME_STATE["tileMap"] = null;
+                GAME_STATE["mobs"] = [];
+                GAME_OVER_MESSAGE = update.text;
+                window.removeEventListener('load', renderViewport);
+                document.removeEventListener('keydown', handleKeyDownGame);
+                document.removeEventListener('click', handleMouseClickGame);
+                document.addEventListener('keydown', handleKeyDownGameOver);
+                MENU_STATE.disableId("character_info");
+                MENU_STATE.disableId("start");
+                renderGameOver();
+                return;
             }
         }
     }
     renderViewport();
+}
+
+async function handleKeyDownGameOver(e) {
+    renderMenu();
+    document.removeEventListener('keydown', handleKeyDownGameOver);
+    window.addEventListener('load', renderMenu);
+    document.addEventListener('keydown', handleKeyDownMenu);
 }
 
 function wait(ms) {
@@ -1190,6 +1227,19 @@ async function handleMouseClickGame(e) {
         }
     }
     renderViewport();
+}
+
+
+let GAME_OVER_MESSAGE = "";
+
+
+function renderGameOver() {
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText("Game over...", 0, 0);
+    ctx.fillText(GAME_OVER_MESSAGE, 0, 32);
+    ctx.fillText("<Press any key to continue.>", 0, 64);
 }
 
 

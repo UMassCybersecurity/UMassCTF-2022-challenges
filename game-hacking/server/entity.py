@@ -2,6 +2,7 @@ import copy
 import math
 import uuid
 
+import combat
 import worldgen
 
 
@@ -238,6 +239,8 @@ class Enemy(Entity):
     def __init__(self, x, y):
         super().__init__(x, y)
         self.health = 5
+        self.experience = 1
+        self.strength = 1
 
     def interact(self, game_state):
         self.health -= 1
@@ -260,7 +263,7 @@ class Enemy(Entity):
         if dist >= 10:
             return []
         elif dist < 2:
-            return game_state.character.receive_attack(None, self)
+            return game_state.character.receive_attack(combat.SharpAttack(self))
         else:
             try:
                 graph = copy.deepcopy(game_state.tilemap())

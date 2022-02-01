@@ -278,10 +278,15 @@ class Character(object):
             # TODO: Update state respectively.
             pass
 
-    def receive_attack(self, attack, mob):
-        return [
-            { "type": "message", "text": f"The {mob.type()} strikes!" },
+    def receive_attack(self, attack):
+        self.health -= attack.calculate_damage()
+        base = [
+            { "type": "message", "text": attack.describe() },
+            { "type": "update_player", "entity": self.serialize() },
         ]
+        if self.health <= 0:
+            base.append({ "type": "game_over", "text": f"You were killed by a {attack.enemy.type()} ..." })
+        return base
 
 
 def distance(a, b):
@@ -291,6 +296,7 @@ def distance(a, b):
 class GameState(object):
     """All-encompassing state object for a session of the game."""
     def __init__(self, character, world):
+        self.to_destroy = False
         self.character = character
         self.world = world
         self.current_world = "grasslands"
@@ -338,6 +344,9 @@ class GameState(object):
                     "type": "update_world",
                     "world": worldgen.sign(self.world)
                 })
+                processed.append(event)
+            elif event["type"] == "game_over":
+                self.to_destroy = True
                 processed.append(event)
             else:
                 processed.append(event)
@@ -597,7 +606,8 @@ class Connection(object):
         print("Successfully logged in as {}".format(username))
         self.logged_in = True
         self.username = username
-        self.game_state = GameState(Character.deserialize(self.character()))
+        if self.character() is not None:
+            self.game_state = GameState(Character.deserialize(self.character()))
         for i, session in enumerate(SESSIONS):
             if session.username == username:
                 SESSIONS.pop(i)
@@ -627,12 +637,20 @@ class Connection(object):
             "world": worldgen.sign(world)
         }
 
+    def destroy_character(self):
+        if not self.logged_in:
+            return None
+        con = sqlite3.connect('users.db')
+        cur = con.cursor()
+        cur.execute('''UPDATE users SET character = NULL WHERE id = ?''', (self.user_id,))
+        con.commit()
+
     def character(self):
         con = sqlite3.connect('users.db')
         cur = con.cursor()
         cur.execute('''SELECT character FROM users WHERE id = ?''', (self.user_id,))
         result = cur.fetchone()
-        if len(result) == 0:
+        if len(result) == 0 or result[0] is None:
             return None
         return json.loads(result[0])
 
@@ -768,6 +786,10 @@ async def handle_connection(websocket):
                 "id": message_id,
                 "data": thunk(c)
             }))
+
+            if c.game_state is not None and c.game_state.to_destroy:
+                c.game_state = None
+                c.destroy_character()
         except json.JSONDecodeError:
             await websocket.send(serialize({
                 "error": "Invalid JSON"

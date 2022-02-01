@@ -337,9 +337,13 @@ class GameState(object):
                 self.position["x"] = event["target_x"]
                 self.position["y"] = event["target_y"]
                 if event["target_world"].startswith("maze"):
-                    maze_mobs, maze_tiles = worldgen.generate_maze(int(event["target_world"][-1]))
-                    self.world["tilemaps"][event["target_world"]] = maze_tiles
-                    self.world["mobs"][event["target_world"]] = maze_mobs
+                    mobs, tiles = worldgen.generate_maze(int(event["target_world"][-1]))
+                    self.world["tilemaps"][event["target_world"]] = tiles
+                    self.world["mobs"][event["target_world"]] = mobs
+                elif event["target_world"] not in self.world["tilemaps"]:
+                    mobs, tiles = worldgen.generate_map(worldgen.descriptions[event["target_world"]])
+                    self.world["tilemaps"][event["target_world"]] = tiles
+                    self.world["mobs"][event["target_world"]] = mobs
                 processed.append({
                     "type": "update_world",
                     "world": worldgen.sign(self.world)

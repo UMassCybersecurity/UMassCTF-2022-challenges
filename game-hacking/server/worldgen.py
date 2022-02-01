@@ -221,50 +221,42 @@ def validate_signature(signature, blob):
     return signature == binascii.hexlify(m.digest()).decode()
 
 
-def generate_world():
-    grassland_mobs, grassland_tiles = generate_map({
+descriptions = {
+    "grassland": {
         "bounding-wall": Tile.WALL,
         "ground": [Tile.GRASS0, Tile.GRASS1, Tile.GRASS2, Tile.GRASS3],
         "building-wall": [Tile.WALL],
         "building-floor": [Tile.FLOOR],
         "decorations": "🌲🌳🌿🌹🌷🌱"
-    })
-    desert_mobs, desert_tiles = generate_map({
+    },
+    "desert": {
         "bounding-wall": Tile.WALL,
         "ground": [Tile.SAND0, Tile.SAND1, Tile.SAND2, Tile.SAND3],
         "building-wall": [Tile.SANDSTONE_WALL],
         "building-floor": [Tile.SANDSTONE],
         "decorations": "🌾🌴🌵"
-    })
+    },
+    # "snowland"
+}
+
+
+def generate_world():
+    grassland_mobs, grassland_tiles = generate_map(descriptions["grassland"])
     return {
         "tilemaps": {
             "grasslands": grassland_tiles,
-            "desert": desert_tiles,
-            # "snowland"
         },
         "mobs": {
             "grasslands": grassland_mobs,
-            "desert": desert_mobs,
-            # "snowland"
         }
     }
 
 
 def sign(world):
-    worldp = world
-    world = {
-        "tilemaps": world["tilemaps"],
-        "mobs": {
-            "grasslands": [mob.serialize() for mob in world["mobs"]["grasslands"]],
-            "desert": [mob.serialize() for mob in world["mobs"]["desert"]],
-            # "snowland"
-        }
-    }
-    if "maze1" in worldp["mobs"]:
-        world["mobs"]["maze1"] = [mob.serialize() for mob in worldp["mobs"]["maze1"]]
-    if "maze2" in worldp["mobs"]:
-        world["mobs"]["maze2"] = [mob.serialize() for mob in worldp["mobs"]["maze2"]]
-    encoded = b64encode(json.dumps(world).encode())
+    worldp = { "tilemaps": world["tilemaps"], "mobs": dict() }
+    for location in world["mobs"]:
+        worldp["mobs"][location] = [mob.serialize() for mob in world["mobs"][location]]
+    encoded = b64encode(json.dumps(worldp).encode())
     signature = generate_signature(encoded)
     return {
         "signature": signature,

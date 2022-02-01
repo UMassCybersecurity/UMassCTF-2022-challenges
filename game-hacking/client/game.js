@@ -912,6 +912,20 @@ function renderViewport() {
 
     let line;
     if (GAME_STATE.mode === "inventory") {
+
+        let rectWidth = 0;
+        let rectHeight = 0;
+        for (let y = 0; y < GAME_STATE.character.inventory.length; y++) {
+            line = GAME_STATE.character.inventory[y]["inventory_view"];
+            line = (GAME_STATE.inventory.selected == y ? "> " : "  ") + line;
+            console.log(ctx.measureText(line));
+            rectWidth = Math.max(rectWidth, ctx.measureText(line).width);
+            rectHeight += 12;
+        }
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, rectWidth + 64, rectHeight + (64 + 32));
+        ctx.fillStyle = "#000000";
         for (let y = 1; y < 1 + GAME_STATE.character.inventory.length; y++) {
             line = GAME_STATE.character.inventory[y - 1]["inventory_view"];
             line = (GAME_STATE.inventory.selected == y - 1 ? "> " : "  ") + line;

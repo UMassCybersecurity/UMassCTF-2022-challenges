@@ -198,6 +198,10 @@ CLASSES = {
 }
 
 
+def experience_for_level(level):
+    return 7 * (level ** 2)
+
+
 class Character(object):
     def __init__(self):
         self.equipped = []
@@ -216,6 +220,7 @@ class Character(object):
         self.intelligence = CLASSES[self.alliance_class]["starting_stats"]["intelligence"]
         self.initiative   = CLASSES[self.alliance_class]["starting_stats"]["initiative"]
         self.inventory    = CLASSES[self.alliance_class]["starting_stats"]["start_items"]()
+        self.experience   = 0
         self.level        = 0
         self.health       = self.max_health
 
@@ -251,7 +256,7 @@ class Character(object):
             "morality"     : self.morality,
             "inventory"    : [x.serialize() for x in self.inventory],
             "level"        : self.level,
-            "max_health"   : self.health,
+            "max_health"   : self.max_health,
             "health"       : self.health,
             "strength"     : self.strength,
             "constitution" : self.constitution,
@@ -278,6 +283,16 @@ class Character(object):
             # TODO: Update state respectively.
             pass
 
+    def receive_projectile_damage(self, damage):
+        self.health -= damage
+        base = [
+            { "type": "message", "text": "You're hit!" },
+            { "type": "update_player", "entity": self.serialize() }
+        ]
+        if self.health <= 0:
+            base.append({ "type": "game_over", "text": f"You were killed by a projectile..." })
+        return base
+
     def receive_attack(self, attack):
         self.health -= attack.calculate_damage()
         base = [
@@ -287,6 +302,14 @@ class Character(object):
         if self.health <= 0:
             base.append({ "type": "game_over", "text": f"You were killed by a {attack.enemy.type()} ..." })
         return base
+
+    def receive_experience(self, exp):
+        self.experience += exp
+        if self.experience >= experience_for_level(self.level + 1):
+            self.level += 1
+            self.experience = 0
+            return [{ "type": "message", "text": f"You level up to {self.level}!" }]
+        return []
 
 
 def distance(a, b):
@@ -348,6 +371,9 @@ class GameState(object):
                     "type": "update_world",
                     "world": worldgen.sign(self.world)
                 })
+                processed.append(event)
+            elif event["type"] == "player_experience":
+                processed += self.character.receive_experience(event["value"])
                 processed.append(event)
             elif event["type"] == "game_over":
                 self.to_destroy = True
@@ -515,14 +541,14 @@ class GameState(object):
         deltas = self.deltas
         self.deltas = []
         enemy_count = len([x for x in self.mobs() if isinstance(x, entity.Enemy)])
-        while enemy_count < 10:
+        while not self.current_world.startswith("maze") and enemy_count < 10:
             x = random.randint(1, 126)
             y = random.randint(1, 126)
             if not worldgen.walkable_surface(self.tilemap()[y][x]):
                 continue
             if (x, y) in [(entity.position["x"], entity.position["y"]) for entity in self.mobs()]:
                 continue
-            mob = entity.Zombie(x, y)
+            mob = random.choice(entity.world_associations[self.current_world])(x, y)
             self.mobs().append(mob)
             self.deltas.append({ "type": "new_mob", "entity": mob.serialize() })
             enemy_count += 1

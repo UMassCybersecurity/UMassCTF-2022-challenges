@@ -1,5 +1,6 @@
 import copy
 import math
+import random
 import uuid
 
 import combat
@@ -70,6 +71,9 @@ class Projectile(Entity):
                 if ent.can_interact():
                     base += ent.interact(game_state)
                 break
+            elif game_state.position["x"] == projected_x and \
+                 game_state.position["y"] == projected_y:
+                base += game_state.character.receive_projectile_damage(self.damage)
             self.position["x"] = projected_x
             self.position["y"] = projected_y
             base.append({
@@ -250,6 +254,7 @@ class Enemy(Entity):
         if self.health == 0:
             return base + [
                 { "type": "message", "text": f"The {self.type()} dies!" },
+                { "type": "player_experience", "value": self.experience },
                 {
                     "type": "become",
                     "id": self.id,
@@ -284,11 +289,124 @@ class Enemy(Entity):
         return super().serialize()
 
 
+class ThrowingEnemy(Enemy):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.projectile = '🧱'
+
+    def tick(self, game_state):
+        dist = distance(self.position, game_state.position)
+        if dist >= 10:
+            return []
+        elif dist < 2:
+            return game_state.character.receive_attack(combat.SharpAttack(self))
+        else:
+            try:
+                if random.choice([1, 2]) == 1:
+                    start_x_offset = 0
+                    start_y_offset = 0
+                    if game_state.position["x"] > self.position["x"]:
+                        start_x_offset = 1
+                    elif game_state.position["x"] < self.position["x"]:
+                        start_x_offset = -1
+                    if game_state.position["y"] > self.position["y"]:
+                        start_y_offset = 1
+                    elif game_state.position["y"] < self.position["y"]:
+                        start_y_offset = -1
+                    game_state.mobs().append(Projectile(
+                        game_state.position["x"],
+                        game_state.position["y"],
+                        1,
+                        self.projectile,
+                        self.position["x"] + start_x_offset,
+                        self.position["y"] + start_y_offset
+                    ))
+                    return []
+                graph = copy.deepcopy(game_state.tilemap())
+                pre_process_tilemap(game_state, graph)
+                first_step = a_star_search(graph, self.position, game_state.position)
+                self.position = first_step
+                return [
+                    {
+                        "type": "move_mob",
+                        "id": self.id,
+                        "new_position": first_step
+                    }
+                ]
+            except Exception as e:
+                print(e)
+                return []
+
+
 class Zombie(Enemy):
     def serialize(self):
         base = super().serialize()
         base.update({
             "world_view": "🧟",
+        })
+        return base
+
+
+class MagicMike(Enemy):
+    def serialize(self):
+        base = super().serialize()
+        base.update({
+            "world_view": "🧞",
+        })
+        return base
+
+
+class WoodlandMonster(Enemy):
+    def serialize(self):
+        base = super().serialize()
+        base.update({
+            "world_view": "👹",
+        })
+        return base
+
+# 🌞🌋🕴️🗿
+
+class MadSun(Enemy):
+    def serialize(self):
+        base = super().serialize()
+        base.update({
+            "world_view": "🌞",
+        })
+        return base
+
+
+class Volcano(ThrowingEnemy):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.projectile = '🪨'
+
+    def serialize(self):
+        base = super().serialize()
+        base.update({
+            "world_view": "🌋",
+        })
+        return base
+
+
+class SentientStatue(Enemy):
+    def serialize(self):
+        base = super().serialize()
+        base.update({
+            "world_view": "🗿",
+        })
+        return base
+
+
+class SantaClaus(Enemy):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.health = 9999
+        self.experience = 999
+
+    def serialize(self):
+        base = super().serialize()
+        base.update({
+            "world_view": "🎅",
         })
         return base
 
@@ -327,7 +445,7 @@ class Portal(Entity):
 class CorrectHorseBatteryAward(Entity):
     def interact(self, game_state):
         return [
-            { "type": "message", "text": "Congrats! Flag is UMASS{[flag here]}" },
+            { "type": "message", "text": "Congratulations! Flag is UMASS{84d_m3mOR135_OF_l457_Y34R_H4h4H4H4}" },
             {
                 "type": "teleport_player",
                 "target_x": 1,
@@ -342,3 +460,9 @@ class CorrectHorseBatteryAward(Entity):
             "world_view": "🏆",
         })
         return base
+
+
+world_associations = {
+    "grasslands": [Zombie, MagicMike, WoodlandMonster],
+    "desert": [MadSun, Volcano, SentientStatue],
+}

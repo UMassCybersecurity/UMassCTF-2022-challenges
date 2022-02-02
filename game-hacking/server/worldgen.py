@@ -192,7 +192,7 @@ def generate_map(description):
             world[y][x] = wall
         buildings_queued -= 1
 
-    entities = [entity.Sign(5, 5), entity.Zombie(4, 4), entity.Pickup(inventory.Bandaid(), 3, 4), entity.Portal("desert", 4, 4, 8, 8), entity.Portal("maze1", 3, 3, 10, 10)]
+    entities = [entity.Portal(0, "desert", 4, 4, 8, 8)]
     environmental_queued = random.randint(30, 50)
     while environmental_queued > 0:
         x = random.randint(1, 126)
@@ -204,8 +204,30 @@ def generate_map(description):
         entities.append(entity.Decoration(random.choice(description["decorations"]), x, y))
         environmental_queued -= 1
 
+    # description["extra"](entities, world)
+
     return entities, world
 
+
+def generate_grasslands(entities, world):
+    while True:
+        x = random.randint(1, 126)
+        y = random.randint(1, 126)
+        if not natural_surface(world[y][x]):
+            continue
+        if distance((x, y), (4, 4)) <= 30:
+            continue
+        entities.append(entity.Portal(25, "desert", 4, 4, 8, 8))
+    while True:
+        x = random.randint(1, 126)
+        y = random.randint(1, 126)
+        if not natural_surface(world[y][x]):
+            continue
+        if distance((x, y), (4, 4)) <= 30:
+            continue
+        entities.append(entity.Portal(0, "maze1", 3, 3, 10, 10))
+    entities.append(entity.Sign(5, 5))
+    
 
 def generate_signature(blob):
     m = hashlib.md5()
@@ -227,14 +249,14 @@ descriptions = {
         "ground": [Tile.GRASS0, Tile.GRASS1, Tile.GRASS2, Tile.GRASS3],
         "building-wall": [Tile.WALL],
         "building-floor": [Tile.FLOOR],
-        "decorations": "🌲🌳🌿🌹🌷🌱"
+        "decorations": "🌲🌳🌿🌹🌷🌱",
     },
     "desert": {
         "bounding-wall": Tile.WALL,
         "ground": [Tile.SAND0, Tile.SAND1, Tile.SAND2, Tile.SAND3],
         "building-wall": [Tile.SANDSTONE_WALL],
         "building-floor": [Tile.SANDSTONE],
-        "decorations": "🌾🌴🌵"
+        "decorations": "🌾🌴🌵",
     },
     # "snowland"
 }
@@ -262,3 +284,8 @@ def sign(world):
         "signature": signature,
         "blob": encoded.decode()
     }
+
+
+def generate_enemy_for_environment(environment):
+    if environment == "grasslands":
+        x = random.randint(1, 5)

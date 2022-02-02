@@ -4,6 +4,7 @@ import random
 import uuid
 
 import combat
+import inventory
 import worldgen
 
 
@@ -245,14 +246,15 @@ class Enemy(Entity):
         self.health = 5
         self.experience = 1
         self.strength = 1
+        self.drop = [inventory.Bandaid]
 
     def interact(self, game_state):
         self.health -= 1
         base = [
             { "type": "message", "text": f"You hit the {self.type()}." }
         ]
-        if self.health == 0:
-            return base + [
+        if self.health <= 0:
+            base += [
                 { "type": "message", "text": f"The {self.type()} dies!" },
                 { "type": "player_experience", "value": self.experience },
                 {
@@ -261,6 +263,12 @@ class Enemy(Entity):
                     "replacement": Corpse(self.position["x"], self.position["y"])
                 }
             ]
+            if random.choice([1]) == 1:
+                x, y = game_state.find_free_space(self.position["x"], self.position["y"])
+                item = random.choice(self.drop)()
+                pickup = Pickup(item, x, y)
+                game_state.mobs().append(pickup)
+                base.append({ "type": "new_mob", "entity": pickup.serialize()})
         return base
 
     def tick(self, game_state):

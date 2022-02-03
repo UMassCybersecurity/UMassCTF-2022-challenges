@@ -24,6 +24,12 @@ class Tile(Enum):
     SAND3          = 10
     SANDSTONE      = 11
     SANDSTONE_WALL = 12
+    ICE0           = 13
+    ICE1           = 14
+    ICE2           = 15
+    ICE3           = 16
+    COBALT         = 17
+    COBALT_WALL    = 18
     
 
 
@@ -46,14 +52,17 @@ def walkable_surface(surf):
         Tile.GRASS0, Tile.GRASS1, Tile.GRASS2, Tile.GRASS3,
         Tile.FLOOR,
         Tile.SAND0, Tile.SAND1, Tile.SAND2, Tile.SAND3,
-        Tile.SANDSTONE
+        Tile.SANDSTONE,
+        Tile.ICE0, Tile.ICE1, Tile.ICE2, Tile.ICE3,
+        Tile.COBALT
     ])
 
 
 def natural_surface(surf):
     return surf in map(lambda x: x.value, [
         Tile.GRASS0, Tile.GRASS1, Tile.GRASS2, Tile.GRASS3,
-        Tile.SAND0, Tile.SAND1, Tile.SAND2, Tile.SAND3
+        Tile.SAND0, Tile.SAND1, Tile.SAND2, Tile.SAND3,
+        Tile.ICE0, Tile.ICE1, Tile.ICE2, Tile.ICE3
     ])
 
 
@@ -192,7 +201,7 @@ def generate_map(description):
             world[y][x] = wall
         buildings_queued -= 1
 
-    entities = [entity.Portal(0, "desert", 4, 4, 8, 8)]
+    entities = [entity.Portal(0, "snowland", 4, 4, 8, 8)]
     environmental_queued = random.randint(30, 50)
     while environmental_queued > 0:
         x = random.randint(1, 126)
@@ -258,7 +267,13 @@ descriptions = {
         "building-floor": [Tile.SANDSTONE],
         "decorations": "🌾🌴🌵",
     },
-    # "snowland"
+    "snowland": {
+        "bounding-wall": Tile.WALL,
+        "ground": [Tile.ICE0, Tile.ICE1, Tile.ICE2, Tile.ICE3],
+        "building-wall": [Tile.COBALT_WALL],
+        "building-floor": [Tile.COBALT],
+        "decorations": "❄🎄🌲",
+    },
 }
 
 

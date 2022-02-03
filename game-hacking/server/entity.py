@@ -418,6 +418,30 @@ class SantaClaus(Enemy):
         })
         return base
 
+    def interact(self, game_state):
+        self.health -= 1
+        base = [
+            { "type": "message", "text": f"You hit the {self.type()}." }
+        ]
+        if self.health <= 0:
+            base += [
+                { "type": "message", "text": f"The {self.type()} dies!" },
+                { "type": "message", "text": "Congratulations! Flag is UMASS{n1c3_901N_j3rk_N0w_Y0U_RU1n3D_CHr157m42}" },
+                {
+                    "type": "become",
+                    "id": self.id,
+                    "replacement": Corpse(self.position["x"], self.position["y"])
+                }
+            ]
+            if random.choice([1]) == 1:
+                x, y = game_state.find_free_space(self.position["x"], self.position["y"])
+                item = random.choice(self.drop)()
+                pickup = Pickup(item, x, y)
+                game_state.mobs().append(pickup)
+                base.append({ "type": "new_mob", "entity": pickup.serialize()})
+        return base
+
+
 
 class Portal(Entity):
     def __init__(self, minimum_level, target_world, target_x, target_y, x, y):
@@ -473,4 +497,5 @@ class CorrectHorseBatteryAward(Entity):
 world_associations = {
     "grasslands": [Zombie, MagicMike, WoodlandMonster],
     "desert": [MadSun, Volcano, SentientStatue],
+    "snowland": [SantaClaus],
 }

@@ -667,6 +667,12 @@ const TILES = [
     load_image("floor.sand_4"),
     load_image("floor.sandstone_floor_1"),
     load_image("wall.sandstone_wall_0"),
+    load_image("floor.ice_0_old"),
+    load_image("floor.ice_1_old"),
+    load_image("floor.ice_2_old"),
+    load_image("floor.ice_3_old"),
+    load_image("wall.cobalt_stone_1"),
+    load_image("floor.black_cobalt_1")
 ];
 console.log(TILES);
 

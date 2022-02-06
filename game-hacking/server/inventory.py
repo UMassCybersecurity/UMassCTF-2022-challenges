@@ -98,8 +98,14 @@ def deserialize(serialized):
     jump_table = {
         "umbrella": Umbrella,
         "purse": Purse,
+        "torch": Torch,
+        "axe": Axe,
+        "raygun": Raygun,
         "bandaid": Bandaid,
+        "fentanyl": Fentanyl,
+        "budlite": BudLite,
         "guitar": Guitar,
+        "banjo": Banjo,
         "aphrodisiac": Aphrodisiac,
     }
     if "type" in serialized and serialized["type"] in jump_table:

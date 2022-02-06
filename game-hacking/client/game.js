@@ -240,9 +240,9 @@ function initializeSocket(socket, reconnect) {
             promiseTracker.inFlight[messageId][0](response.data);
             delete promiseTracker.inFlight[messageId];
         } else if (response.hasOwnProperty("error")) {
-            console.error(response.error);
+            alert(response.error);
         } else {
-            console.error("Unhandled server-side exception.");
+            alert("Unhandled server-side exception.");
         }
     });
     socket.addEventListener('close', function (event) {
@@ -336,6 +336,7 @@ const MENU_STATE = {
                     window.addEventListener('load', renderViewport);
                     document.addEventListener('keydown', handleKeyDownGame);
                     canvas.addEventListener('click', handleMouseClickGame);
+                    renderViewport();
                 }
             },
             {
@@ -755,7 +756,8 @@ function renderMenu() {
             y += 16;
             break;
         case "label":
-            ctx.fillText("  " + entity.label, x, y);
+            prefix = i == MENU_STATE.currentItem ? "> " : "  ";
+            ctx.fillText(prefix + entity.label, x, y);
             y += 16;
             break;
         case "spacer":
@@ -1168,7 +1170,7 @@ async function handleKeyDownGame(e) {
                 GAME_STATE.loadWorld(update.target_world)
                 break;
             case "update_world":
-                window.localStorage.setItem('world', JSON.stringify(update.world));
+                window.localStorage.setItem('world', JSON.stringify(update.world).replace('{', '').replace('}', ''));
                 break;
             case "update_player":
                 GAME_STATE.character = update.entity;

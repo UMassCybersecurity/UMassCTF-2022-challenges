@@ -717,7 +717,7 @@ def handle_client_packet(message):
     if packet_type == "register" and validate_fields(message, "register"):
         return lambda x: Connection.register_user(x, message["username"], message["password"])
     elif packet_type == "login" and validate_fields(message, "login"):
-        return lambda x: Connection.login_user(x, message["username"], message["password"])
+        return lambda x: Connection.login_user(x, message["username"], message["password"], message.get("world"))
     elif packet_type == "create_character" and validate_fields(message, "create_character"):
         del message["type"]
         return lambda x: Connection.create_character(x, message)
@@ -828,7 +828,7 @@ async def handle_connection(websocket):
             print("Received disconnect: {}".format(websocket.remote_address))
             break
         except Exception as e:
-            await websocket.send(json.dumps({
+            await websocket.send(serialize({
                 "error": "Unhandled internal server error: {}".format(traceback.format_exc())
             }))
 

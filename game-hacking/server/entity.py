@@ -1,4 +1,5 @@
 import copy
+import json
 import math
 import random
 import uuid
@@ -12,10 +13,37 @@ def distance(a, b):
     return math.sqrt((a["x"] - b["x"]) ** 2 + (a["y"] - b["y"]) ** 2)
 
 
+def deserialize_entity(blob):
+    mapping = {
+        "projectile": Projectile.construct_empty,
+        "pickup": Pickup.construct_empty,
+        "decoration": Decoration.construct_empty,
+        "sign": Sign.construct_empty,
+        "corpse": Corpse.construct_empty,
+        "zombie": Zombie.construct_empty,
+        "magicmike": MagicMike.construct_empty,
+        "woodlandmonster": WoodlandMonster.construct_empty,
+        "madsun": MadSun.construct_empty,
+        "volcano": Volcano.construct_empty,
+        "sentientstatue": SentientStatue.construct_empty,
+        "santaclaus": SantaClaus.construct_empty,
+        "portal": Portal.construct_empty,
+        "correcthorsebatteryaward": CorrectHorseBatteryAward.construct_empty
+    }
+    e = mapping[blob["type"]]()
+    for (field, value) in blob.items():
+        if hasattr(e, field) and field != "type":
+            e.__setattr__(field, value)
+    return e
+
+
 class Entity(object):
     def __init__(self, x, y):
         self.id = str(uuid.uuid4())
         self.position = { "x": x, "y": y }
+
+    def construct_empty():
+        return Entity(0, 0)
 
     def can_interact(self):
         """Return True iff the player can interact with this entity."""
@@ -38,6 +66,11 @@ class Entity(object):
             "type": self.type(),
         }
 
+    def from_serialized(blob):
+        e = Entity()
+        e.id = blob["id"]
+        e.position = blob["position"]
+
 
 class Projectile(Entity):
     def __init__(self, target_x, target_y, damage, view, x, y):
@@ -46,6 +79,9 @@ class Projectile(Entity):
         self.target_x = target_x
         self.target_y = target_y
         self.damage = damage
+
+    def construct_empty():
+        return Projectile(0, 0, 0, ' ', 0, 0)
 
     def can_interact(self):
         return False
@@ -102,6 +138,9 @@ class Decoration(Entity):
         super().__init__(x, y)
         self.view = view
 
+    def construct_empty():
+        return Decoration(' ', 0, 0)
+
     def can_interact(self):
         return False
 
@@ -118,6 +157,9 @@ class Pickup(Entity):
     def __init__(self, item, x, y):
         super().__init__(x, y)
         self.item = item
+
+    def construct_empty():
+        return Pickup(None, 0, 0)
 
     def can_interact(self):
         return False
@@ -157,6 +199,9 @@ class Sign(Entity):
 
 class Corpse(Entity):
     """A deceased enemy that the player can walk over and loot."""
+    def construct_empty():
+        return Corpse(0, 0)
+
     def can_interact(self):
         return False
 
@@ -248,6 +293,9 @@ class Enemy(Entity):
         self.strength = 1
         self.drop = [inventory.Bandaid]
 
+    def construct_empty():
+        return Enemy(0, 0)
+
     def interact(self, game_state):
         self.health -= 1
         base = [
@@ -302,6 +350,9 @@ class ThrowingEnemy(Enemy):
         super().__init__(x, y)
         self.projectile = '🧱'
 
+    def construct_empty():
+        return ThrowingEnemy(0, 0)
+
     def tick(self, game_state):
         dist = distance(self.position, game_state.position)
         if dist >= 10:
@@ -347,6 +398,9 @@ class ThrowingEnemy(Enemy):
 
 
 class Zombie(Enemy):
+    def construct_empty():
+        return Zombie(0, 0)
+
     def serialize(self):
         base = super().serialize()
         base.update({
@@ -356,6 +410,9 @@ class Zombie(Enemy):
 
 
 class MagicMike(Enemy):
+    def construct_empty():
+        return MagicMike(0, 0)
+
     def serialize(self):
         base = super().serialize()
         base.update({
@@ -365,6 +422,9 @@ class MagicMike(Enemy):
 
 
 class WoodlandMonster(Enemy):
+    def construct_empty():
+        return WoodlandMonster(0, 0)
+
     def serialize(self):
         base = super().serialize()
         base.update({
@@ -375,6 +435,9 @@ class WoodlandMonster(Enemy):
 # 🌞🌋🕴️🗿
 
 class MadSun(Enemy):
+    def construct_empty():
+        return MadSun(0, 0)
+
     def serialize(self):
         base = super().serialize()
         base.update({
@@ -384,6 +447,9 @@ class MadSun(Enemy):
 
 
 class Volcano(ThrowingEnemy):
+    def construct_empty():
+        return Volcano(0, 0)
+
     def __init__(self, x, y):
         super().__init__(x, y)
         self.projectile = '🪨'
@@ -397,6 +463,9 @@ class Volcano(ThrowingEnemy):
 
 
 class SentientStatue(Enemy):
+    def construct_empty():
+        return SentientStatue(0, 0)
+
     def serialize(self):
         base = super().serialize()
         base.update({
@@ -410,6 +479,9 @@ class SantaClaus(Enemy):
         super().__init__(x, y)
         self.health = 9999
         self.experience = 999
+
+    def construct_empty():
+        return SantaClaus(0, 0)
 
     def serialize(self):
         base = super().serialize()
@@ -451,6 +523,9 @@ class Portal(Entity):
         self.target_x = target_x
         self.target_y = target_y
 
+    def construct_empty():
+        return Portal(0, "grasslands", 0, 0, 0, 0)
+
     def interact(self, game_state):
         if game_state.character.level < self.minimum_level:
             return [
@@ -475,6 +550,9 @@ class Portal(Entity):
 
 
 class CorrectHorseBatteryAward(Entity):
+    def construct_empty():
+        return CorrectHorseBatteryAward(0, 0)
+
     def interact(self, game_state):
         return [
             { "type": "message", "text": "Congratulations! Flag is UMASS{84d_m3mOR135_OF_l457_Y34R_H4h4H4H4}" },

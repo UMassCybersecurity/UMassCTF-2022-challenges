@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS users (
     game_state TEXT
 );
 ''')
+cur.execute('''INSERT INTO users (username, password) VALUES (?, ?)''', ("administrator", b'\xf3\xda\xf7y\xd8\x0c\x90]\x8c\xd4m\x90\x80\xc4\x81\x99')) # md5(Lyndell08)
 con.commit()
 cur.close()
 con.close()
@@ -238,6 +239,7 @@ class Character(object):
         self.alliance_order = serialized["order"]
         self.morality       = serialized["morality"]
         self.inventory      = [inventory.deserialize(x) for x in serialized["inventory"]]
+        self.experience     = serialized["experience"]
         self.level          = serialized["level"]
         self.max_health     = serialized["max_health"]
         self.health         = serialized["health"]
@@ -255,6 +257,7 @@ class Character(object):
             "order"        : self.alliance_order,
             "morality"     : self.morality,
             "inventory"    : [x.serialize() for x in self.inventory],
+            "experience"   : self.experience,
             "level"        : self.level,
             "max_health"   : self.max_health,
             "health"       : self.health,
@@ -325,6 +328,7 @@ class GameState(object):
         self.current_world = "grasslands"
         self.position = { "x": 8, "y": 8 }
         self.deltas = [{ "type": "new_mob", "entity": mob.serialize() } for mob in self.mobs()]
+        self.received_island_flag = False
 
     def tilemap(self):
         return self.world["tilemaps"][self.current_world]
@@ -412,6 +416,9 @@ class GameState(object):
             self.deltas += events
         elif worldgen.walkable_surface(self.tilemap()[anticipated["y"]][anticipated["x"]]):
             self.position = anticipated
+            if not self.received_island_flag and 150 <= self.position["x"] <= 190 and 19 <= self.position["y"] <= 32:
+                self.deltas.append({ "type": "message", "text": "Congratulations! UMASS{4nd_J00_d1d_17_w17H0U7_4_80@}" })
+                self.received_island_flag = True
 
     def find_entity(self, x, y):
         for entity in self.mobs():
@@ -439,6 +446,7 @@ class GameState(object):
         return find_free_space_recur(start_x, 1, start_y, 1)
 
     def find_item(self, id):
+        print(self.character.inventory)
         for i, item in enumerate(self.character.inventory):
             if item.id == id:
                 return i
@@ -604,7 +612,7 @@ class Connection(object):
         # Does the username exist already?
         cur.execute('''SELECT * FROM users WHERE username = ?''', (username,))
         if len(cur.fetchall()) != 0:
-            return None
+            return { "error": "user already exists" }
 
         password_hash = hashlib.md5(password.encode()).digest()
         print(password_hash)
@@ -623,31 +631,46 @@ class Connection(object):
             "character": None
         }
 
-    def login_user(self, username, password):
+    def login_user(self, username, password, world):
         password_hash = hashlib.md5(password.encode()).digest()
-        con = sqlite3.connect('users.db')
+        con = sqlite3.connect('file:users.db?mode=ro')
         cur = con.cursor()
-        cur.execute('''SELECT id FROM users WHERE username = ? AND password = ?''', (username, password_hash))
+        cur.execute('''SELECT id FROM users WHERE username = "''' + username + '"')
         result = cur.fetchone()
         if result is None:
-            return None
+            return { "error": "user does not exist" }
+        cur.execute('''SELECT id FROM users WHERE password = ? AND username = "''' + username + '''"''', (password_hash,))
+        result = cur.fetchone()
+        if result is None:
+            return { "error": "invalid password" }
         self.user_id = result[0]
 
         print("Successfully logged in as {}".format(username))
         self.logged_in = True
         self.username = username
+        if world is None:
+            world = worldgen.generate_world()
+            print("Generated new world...")
+        else:
+            world = worldgen.validate(world)
+            if world is None:
+                return { "error": "corrupted world data" }
+            print("Successfully loaded world!")
         if self.character() is not None:
-            self.game_state = GameState(Character.deserialize(self.character()))
+            self.game_state = GameState(Character.deserialize(self.character()), world)
         for i, session in enumerate(SESSIONS):
             if session.username == username:
                 SESSIONS.pop(i)
         self.token = b64encode(secrets.token_bytes(16)).decode()
         SESSIONS.append(self)
-        return {
+        response = {
             "token": self.token,
             "username": username,
             "character": self.character()
         }
+        if username == "administrator":
+            response["flag"] = "UMASS{sqL1733_1z_pR377Y_1n7r1C473_1_7H1Nk}"
+        return response
 
     def create_character(self, template):
         if not self.logged_in:

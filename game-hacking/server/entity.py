@@ -172,6 +172,11 @@ class Pickup(Entity):
         })
         return base
 
+SIGN_TEXT = [
+    "Welcome to MapleQuest!",
+    "You deserve a gift: UMASS{83H0LD_73h_S19nM4s73r}"
+]
+
 
 class Sign(Entity):
     """A signpost that the player can read.
@@ -179,9 +184,12 @@ class Sign(Entity):
     This is a special kind of entity, having a packet type of its own for the
     sole purpose of enabling the `easteregg` flag.
     """
-    def __init__(self, x, y):
+    def __init__(self, idx, x, y):
         super().__init__(x, y)
-        self.text = "This sign is a test."
+        self.idx = idx
+
+    def construct_empty():
+        return Sign(0, 0, 0)
 
     def interact(self, game_state):
         return [
@@ -192,7 +200,7 @@ class Sign(Entity):
         base = super().serialize()
         base.update({
             "world_view": "🪧",
-            "sign_id": 0
+            "sign_id": self.idx
         })
         return base
 

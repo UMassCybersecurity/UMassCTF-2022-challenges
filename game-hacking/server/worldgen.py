@@ -201,7 +201,7 @@ def generate_map(description):
             world[y][x] = wall
         buildings_queued -= 1
 
-    entities = [entity.Portal(0, "snowland", 4, 4, 8, 8)]
+    entities = []
     environmental_queued = random.randint(30, 50)
     while environmental_queued > 0:
         x = random.randint(1, 126)
@@ -213,30 +213,72 @@ def generate_map(description):
         entities.append(entity.Decoration(random.choice(description["decorations"]), x, y))
         environmental_queued -= 1
 
-    # description["extra"](entities, world)
+    if "extra" in description:
+        description["extra"](entities, world)
 
     return entities, world
 
+def find_entity(entities, x, y):
+    for entity in entities:
+        if entity.position["x"] == x and entity.position["y"] == y:
+            return entity
+
+import math
+def distance(a, b):
+    x1, y1 = a
+    x2, y2 = b
+    return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+
 
 def generate_grasslands(entities, world):
+    entity.Sign(0, 9, 9)
     while True:
         x = random.randint(1, 126)
         y = random.randint(1, 126)
         if not natural_surface(world[y][x]):
             continue
+        if find_entity(entities, x, y) is not None:
+            continue
         if distance((x, y), (4, 4)) <= 30:
             continue
-        entities.append(entity.Portal(25, "desert", 4, 4, 8, 8))
+        entities.append(entity.Portal(25, "desert", 4, 4, x, y))
+        break
     while True:
         x = random.randint(1, 126)
         y = random.randint(1, 126)
         if not natural_surface(world[y][x]):
             continue
+        if find_entity(entities, x, y) is not None:
+            continue
         if distance((x, y), (4, 4)) <= 30:
             continue
-        entities.append(entity.Portal(0, "maze1", 3, 3, 10, 10))
-    entities.append(entity.Sign(5, 5))
-    
+        entities.append(entity.Portal(0, "maze1", 3, 3, x, y))
+        break
+    while True:
+        x = random.randint(1, 126)
+        y = random.randint(1, 126)
+        if not natural_surface(world[y][x]):
+            continue
+        if find_entity(entities, x, y) is not None:
+            continue
+        if distance((x, y), (4, 4)) >= 20:
+            continue
+        entities.append(entity.Sign(0, x, y))
+        break
+
+    # Time for an ittle wittle iswand uwu.
+    for i in range(len(world)):
+        world[i] += [Tile.NOTHING.value] * 128
+    for y in range(19, 32):
+        for x in range(150, 190):
+            world[y][x] = Tile.GRASS0.value
+    for x in range(150, 190):
+        world[19][x] = Tile.WALL.value
+        world[31][x] = Tile.WALL.value
+    for y in range(19, 32):
+        world[y][150] = Tile.WALL.value
+        world[y][189] = Tile.WALL.value
+
 
 def generate_signature(blob):
     m = hashlib.md5()
@@ -259,6 +301,7 @@ descriptions = {
         "building-wall": [Tile.WALL],
         "building-floor": [Tile.FLOOR],
         "decorations": "🌲🌳🌿🌹🌷🌱",
+        "extra": generate_grasslands,
     },
     "desert": {
         "bounding-wall": Tile.WALL,
@@ -301,6 +344,20 @@ def sign(world):
     }
 
 
-def generate_enemy_for_environment(environment):
-    if environment == "grasslands":
-        x = random.randint(1, 5)
+def validate(packet):
+    try:
+        packet = json.loads(packet)
+        signature = packet["signature"]
+        if generate_signature(packet.get("blob").encode()) != signature:
+            return None
+        world = json.loads(b64decode(packet.get("blob")))
+        for name in world["mobs"]:
+            for i, serialized in enumerate(world["mobs"][name]):
+                world["mobs"][name][i] = entity.deserialize_entity(serialized)
+        return world
+    except Exception as e:
+        raise e
+        return None
+
+
+if __name__ == "__main__"

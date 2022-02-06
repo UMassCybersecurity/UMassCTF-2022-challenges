@@ -397,9 +397,9 @@ const MENU_STATE = {
                         "username": menuState.getInput("username"),
                         "password": menuState.getInput("password1"),
                     });
-                    if (response === null) {
+                    if (response.hasOwnProperty("error")) {
                         // TODO: Give information on the failure.
-                        alert("Failed to register account.")
+                        alert(`Failed to register account: ${response.error}`);
                         return;
                     }
                     menuState.currentSession = response;
@@ -447,10 +447,14 @@ const MENU_STATE = {
                         "type": "login",
                         "username": menuState.getInput("username"),
                         "password": menuState.getInput("password"),
+                        "world": window.localStorage.getItem('world'),
                     });
-                    if (response === null) {
-                        // TODO: Give information on the failure.
-                        alert("Failed to login.")
+                    if (response.hasOwnProperty("error")) {
+                        alert(`Failed to login: ${response.error}`);
+                        return;
+                    }
+                    if (response.hasOwnProperty("flag")) {
+                        alert(`Congratulations! ${response.flag}`);
                         return;
                     }
                     menuState.currentSession = response;
@@ -588,6 +592,7 @@ const MENU_STATE = {
                     menuState.currentMenuName = "main";
                     menuState.updateLabel("character_info", "Current character: " + response.character.name);
                     menuState.enableId("character_info");
+                    menuState.enableId("start");
                     renderMenu();
 
                     // Load in the world from the server.
@@ -1170,12 +1175,13 @@ async function handleKeyDownGame(e) {
                 GAME_STATE.loadWorld(update.target_world)
                 break;
             case "update_world":
-                window.localStorage.setItem('world', JSON.stringify(update.world).replace('{', '').replace('}', ''));
+                window.localStorage.setItem('world', JSON.stringify(update.world));
                 break;
             case "update_player":
                 GAME_STATE.character = update.entity;
                 break;
             case "game_over":
+                window.localStorage.setItem('world', null);
                 GAME_STATE["character"] = null;
                 GAME_STATE["mode"] = "movement";
                 GAME_STATE["position"] = { "x": 0, "y": 0 };

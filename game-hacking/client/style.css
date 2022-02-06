@@ -8,3 +8,16 @@ canvas {
     margin-top: 2em;
     border: 4px solid;
 }
+
+footer {
+    width: 60%;
+    padding: 0 1em;
+    margin: auto;
+    margin-top: 1em;
+    background-color: white;
+    border: solid black;
+}
+
+footer p {
+    font-size: 8pt;
+}

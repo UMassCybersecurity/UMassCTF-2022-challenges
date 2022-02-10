@@ -20,7 +20,7 @@ def sus():
 @app.route("/inthevents",methods= ['GET','POST'])
 def venting():
     if(request.args.get("admin") == 'True'):
-        return send_from_directory("../static","/fff5bf676ba8796f0c51033403b35311/success",code=307)
+        return redirect("/fff5bf676ba8796f0c51033403b35311/success",code=307)
     else:
         return redirect("/submitted",code=307)
 

@@ -7,7 +7,7 @@ CTF challenge repo naming scheme:
 
 Things to include within each challenge directory:
 - `/src` directory for source files that need to be built (dynamic challenges)
-- `/static` directory for challenge files that are static (static challenges)
+- `/static` directory for public files that are <strong>GIVEN TO THE USER AS-IS</strong> (static challenges)
 - `/hint` directory for any hint files
 - `README.md` file with challenge name, description, `UMASS{...}` flag and any notes [optional, internally facing]
 - `solution[.md/.txt]` file with challenge solution [and flag if ready]

@@ -15,26 +15,22 @@ def distance(a, b):
 
 def deserialize_entity(blob):
     mapping = {
-        "projectile": Projectile.construct_empty,
-        "pickup": Pickup.construct_empty,
-        "decoration": Decoration.construct_empty,
-        "sign": Sign.construct_empty,
-        "corpse": Corpse.construct_empty,
-        "zombie": Zombie.construct_empty,
-        "magicmike": MagicMike.construct_empty,
-        "woodlandmonster": WoodlandMonster.construct_empty,
-        "madsun": MadSun.construct_empty,
-        "volcano": Volcano.construct_empty,
-        "sentientstatue": SentientStatue.construct_empty,
-        "santaclaus": SantaClaus.construct_empty,
-        "portal": Portal.construct_empty,
-        "correcthorsebatteryaward": CorrectHorseBatteryAward.construct_empty
+        "projectile": Projectile,
+        "pickup": Pickup,
+        "decoration": Decoration,
+        "sign": Sign,
+        "corpse": Corpse,
+        "zombie": Zombie,
+        "magicmike": MagicMike,
+        "woodlandmonster": WoodlandMonster,
+        "madsun": MadSun,
+        "volcano": Volcano,
+        "sentientstatue": SentientStatue,
+        "santaclaus": SantaClaus,
+        "portal": Portal,
+        "correcthorsebatteryaward": CorrectHorseBatteryAward
     }
-    e = mapping[blob["type"]]()
-    for (field, value) in blob.items():
-        if hasattr(e, field) and field != "type":
-            e.__setattr__(field, value)
-    return e
+    return mapping[blob["type"]].deserialize(blob)
 
 
 class Entity(object):
@@ -66,16 +62,19 @@ class Entity(object):
             "type": self.type(),
         }
 
-    def from_serialized(blob):
-        e = Entity()
-        e.id = blob["id"]
-        e.position = blob["position"]
+    @classmethod
+    def deserialize(cls, blob):
+        e = cls.construct_empty()
+        for (field, value) in blob.items():
+            if hasattr(e, field) and field != "type":
+                e.__setattr__(field, value)
+        return e
 
 
 class Projectile(Entity):
     def __init__(self, target_x, target_y, damage, view, x, y):
         super().__init__(x, y)
-        self.view = view
+        self.world_view = view
         self.target_x = target_x
         self.target_y = target_y
         self.damage = damage
@@ -125,18 +124,17 @@ class Projectile(Entity):
     # TODO: Need to process resultant effects
 
     def serialize(self):
-        return {
-            "id": self.id,
-            "position": { "x": round(self.position["x"]), "y": round(self.position["y"]) },
-            "world_view": self.view,
-            "type": self.type(),
-        }
+        base = super().serialize()
+        base.update({
+            "world_view": self.world_view,
+        })
+        return base
 
 
 class Decoration(Entity):
     def __init__(self, view, x, y):
         super().__init__(x, y)
-        self.view = view
+        self.world_view = view
 
     def construct_empty():
         return Decoration(' ', 0, 0)
@@ -145,12 +143,11 @@ class Decoration(Entity):
         return False
 
     def serialize(self):
-        return {
-            "id": self.id,
-            "position": self.position,
-            "world_view": self.view,
-            "type": self.type(),
-        }
+        base = super().serialize()
+        base.update({
+            "world_view": self.world_view,
+        })
+        return base
 
 
 class Pickup(Entity):
@@ -168,9 +165,20 @@ class Pickup(Entity):
         base = super().serialize()
         base.update({
             "world_view": "🎁",
-            "sign_id": 0
+            "item": self.item.serialize() if self.item else None
         })
         return base
+
+    @classmethod
+    def deserialize(cls, blob):
+        e = cls.construct_empty()
+        for (field, value) in blob.items():
+            if field == "item" and value is not None:
+                e.item = inventory.deserialize(value)
+            elif hasattr(e, field) and field != "type":
+                e.__setattr__(field, value)
+        return e
+
 
 SIGN_TEXT = [
     "Welcome to MapleQuest!",
@@ -299,7 +307,7 @@ class Enemy(Entity):
         self.health = 5
         self.experience = 1
         self.strength = 1
-        self.drop = [inventory.Bandaid]
+        self.drop = [inventory.Bandaid()]
 
     def construct_empty():
         return Enemy(0, 0)
@@ -350,7 +358,28 @@ class Enemy(Entity):
                 return []
 
     def serialize(self):
-        return super().serialize()
+        base = super().serialize()
+        base.update({
+            "world_view": "🎁",
+            "health": self.health,
+            "experience": self.experience,
+            "strength": self.strength,
+            "drop": [x.serialize() for x in self.drop]
+        })
+        return base
+
+    @classmethod
+    def deserialize(cls, blob):
+        e = cls.construct_empty()
+        for (field, value) in blob.items():
+            if field == "drop" and value is not None:
+                e.drop = []
+                for item in value:
+                    e.drop.append(inventory.deserialize(item))
+            elif hasattr(e, field) and field != "type":
+                e.__setattr__(field, value)
+        return e
+
 
 
 class ThrowingEnemy(Enemy):
@@ -439,8 +468,6 @@ class WoodlandMonster(Enemy):
             "world_view": "👹",
         })
         return base
-
-# 🌞🌋🕴️🗿
 
 class MadSun(Enemy):
     def construct_empty():
@@ -553,6 +580,10 @@ class Portal(Entity):
         base = super().serialize()
         base.update({
             "world_view": "🕳️",
+            "minimum_level": self.minimum_level,
+            "target_world": self.target_world,
+            "target_x": self.target_x,
+            "target_y": self.target_y
         })
         return base
 

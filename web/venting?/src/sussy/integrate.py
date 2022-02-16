@@ -1,9 +1,9 @@
 import sqlite3 as sql
 import re
 #will figure out flag + sanitizing later
-#flag = "UMASSCTF{7H35U55Y1MP0573rCr4CK57H3C0D3}"
+#flag = ""
 def sanitize(query):
-    r = re.compile(r"-",re.IGNORECASE)
+    r = re.compile(r"-|null|*",re.IGNORECASE)
     query = re.sub(r,"ඞ",str(query))
     return query
 def validate(username,password):
@@ -18,3 +18,4 @@ def validate(username,password):
             return "If you're getting this you're not me. You'll never log in! ALSO I DIDNT HIDE ANYTHING IN MY PASSWORD SO DONT TRY!",200
     except sql.Error as er:
         return ''.join("Error when executing statement -> " + str(er) + " " + statement),500
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   

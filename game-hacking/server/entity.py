@@ -1,3 +1,5 @@
+from util import *
+
 import copy
 import json
 import math
@@ -7,11 +9,6 @@ import uuid
 import combat
 import inventory
 import worldgen
-
-
-def distance(a, b):
-    return math.sqrt((a["x"] - b["x"]) ** 2 + (a["y"] - b["y"]) ** 2)
-
 
 def deserialize_entity(blob):
     mapping = {
@@ -115,7 +112,7 @@ class Projectile(Entity):
             base.append({
                 "type": "move_mob_animate",
                 "id": self.id,
-                "new_position": dict(self.position)
+                "new_position": dict(self.position),
             })
             max_steps -= 1
         base.append({ "type": "delete_mob", "id": self.id })
@@ -305,9 +302,12 @@ class Enemy(Entity):
     def __init__(self, x, y):
         super().__init__(x, y)
         self.health = 5
+        self.agility = 0
+        self.dexterity = 1
         self.experience = 1
         self.strength = 1
         self.drop = [inventory.Bandaid()]
+        self.lock = False
 
     def construct_empty():
         return Enemy(0, 0)
@@ -329,29 +329,34 @@ class Enemy(Entity):
             ]
             if random.choice([1]) == 1:
                 x, y = game_state.find_free_space(self.position["x"], self.position["y"])
-                item = random.choice(self.drop)()
+                item = random.choice(self.drop)
                 pickup = Pickup(item, x, y)
                 game_state.mobs().append(pickup)
                 base.append({ "type": "new_mob", "entity": pickup.serialize()})
         return base
 
     def tick(self, game_state):
+        if self.lock:
+            return []
         dist = distance(self.position, game_state.position)
         if dist >= 10:
             return []
         elif dist < 2:
-            return game_state.character.receive_attack(combat.SharpAttack(self))
+            if random.randint(1, round(lerp(10, 1, self.experience / 100.0))) == 1:
+                return game_state.character.receive_attack(combat.SharpAttack(self))
+            else:
+                return [{ "type": "message", "text": f"The {self.type()} misses!" }]
         else:
             try:
                 graph = copy.deepcopy(game_state.tilemap())
                 pre_process_tilemap(game_state, graph)
                 first_step = a_star_search(graph, self.position, game_state.position)
-                self.position = first_step
                 return [
                     {
                         "type": "move_mob",
                         "id": self.id,
-                        "new_position": first_step
+                        "new_position": first_step,
+                        "tu": lerp(64, 4, self.agility / 10.0)
                     }
                 ]
             except Exception:
@@ -421,12 +426,12 @@ class ThrowingEnemy(Enemy):
                 graph = copy.deepcopy(game_state.tilemap())
                 pre_process_tilemap(game_state, graph)
                 first_step = a_star_search(graph, self.position, game_state.position)
-                self.position = first_step
                 return [
                     {
                         "type": "move_mob",
                         "id": self.id,
-                        "new_position": first_step
+                        "new_position": first_step,
+                        "tu": lerp(64, 4, self.agility / 10.0)
                     }
                 ]
             except Exception as e:

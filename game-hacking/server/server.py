@@ -18,7 +18,7 @@ import entity
 import inventory
 import worldgen
 
-# Initialise the database.
+# Initialize the database.
 con = sqlite3.connect('users.db')
 cur = con.cursor()
 cur.execute('''
@@ -329,6 +329,7 @@ class GameState(object):
         self.position = { "x": 8, "y": 8 }
         self.deltas = [{ "type": "new_mob", "entity": mob.serialize() } for mob in self.mobs()]
         self.received_island_flag = False
+        self.action_queue = []
 
     def tilemap(self):
         return self.world["tilemaps"][self.current_world]
@@ -560,9 +561,11 @@ class GameState(object):
             self.mobs().append(mob)
             self.deltas.append({ "type": "new_mob", "entity": mob.serialize() })
             enemy_count += 1
+        events = []
         for ent in self.mobs():
             if hasattr(ent, "tick"):
-                deltas += self.process_events(ent.tick(self))
+                events += ent.tick(self)
+        deltas += self.process_events(events, lerp(64, 4, self.character.initiative / 10.0))
         return [
             { "type": "update_position", "x": self.position["x"], "y": self.position["y"] },
         ] + deltas

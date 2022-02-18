@@ -50,18 +50,17 @@ def destruct(fd: BufferedReader) -> Optional[ArchiveTable]:
     ret.offset = base
 
     # File signature
-    if (sig := fd.read(4)) != bytes([0x4D, 0x79, 0x72, 0x41]):
+    if (sig := fd.read(4)) != b"MyrA":
         return None
     ret.signature = sig
 
-    (ret.version,) = unpack("B", fd.read(1))
-    (ret.count,) = unpack("N", fd.read(8))
+    ret.version, ret.count = unpack("<BQ", fd.read(9))
     ret.files = []
     for _ in range(ret.count):
         name = b""
         while len(byte := fd.read(1)) != 0 and byte[0] != 0x0:
             name += byte
-        _, length, offset = unpack("NNN", fd.read(24))
+        _, length, offset = unpack("3N", fd.read(24))
         entry = FileEntry(name, base + offset, length)
         ret.files.append(entry)
 
@@ -72,17 +71,16 @@ def read_archive(filename: str) -> Optional[ArchiveTable]:
     with open(filename, "rb") as fd:
         while True:
             # print("Searching")
-            while len(byte := fd.read(1)) != 0 and byte[0] != 0x4D:
+            while len(buffer := fd.read(2)) != 0 and buffer != b"\xFF\xD9":
                 pass
-            if len(byte) == 0:
+            if len(buffer) != 2:
                 break
             offset = fd.tell()
 
-            if fd.read(3) == bytes([0x79, 0x72, 0x41]):
-                print("Found possible?")
-                fd.seek(-4, SEEK_CUR)
-                if (ret := destruct(fd)) is not None:
-                    return ret
+            print("Found possible at", offset)
+            if (ret := destruct(fd)) is not None:
+                return ret
+
             fd.seek(offset, SEEK_SET)
     print("Not the challenge file!")
     return None
@@ -105,18 +103,20 @@ if __name__ == "__main__":
     if len(argv) > 1:
         target = argv[-1]
         frame = read_archive(target)
-        print(frame)
-        unpacked = extract(target, frame.files)
+        if frame is not None:
+            print(frame)
+            unpacked = extract(target, frame.files)
 
-        # Find key
-        pattern = compile(rb"(.+)\1")
-        with open(target, "rb") as fd:
-            out = xor_two_bytes(fd.read(frame.offset), unpacked[b"penguin.jpg"])
-        key = pattern.findall(out)[0]
-        print("Keyfound:", key)
+            # Find key
+            pattern = compile(rb"(.+)\1")
+            with open(target, "rb") as fd:
+                out = xor_two_bytes(fd.read(frame.offset), unpacked[b"penguin.jpg"])
+            key = pattern.findall(out)[0]
+            # print("Keyfound:", key)
 
-        # Write to files
-        for name, entry in unpacked.items():
-            print("Extracted:", name)
-            with open(name, "wb") as fd:
-                fd.write(xor_two_bytes(entry, chain.from_iterable(repeat(tuple(key)))))
+            # Write to files
+            for name, entry in unpacked.items():
+                print("Extracted:", name)
+                with open(name, "wb") as fd:
+                    key_bytes = chain.from_iterable(repeat(tuple(key)))
+                    fd.write(xor_two_bytes(entry, key_bytes))

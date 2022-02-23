@@ -3,7 +3,7 @@ import re
 #will figure out flag + sanitizing later
 #flag = ""
 def sanitize(query):
-    r = re.compile(r"-|null|*",re.IGNORECASE)
+    r = re.compile(r"-",re.IGNORECASE)
     query = re.sub(r,"ඞ",str(query))
     return query
 def validate(username,password):

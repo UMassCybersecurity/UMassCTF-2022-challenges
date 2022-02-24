@@ -33,7 +33,7 @@ class Tile(Enum):
     
 
 
-SECRET_KEY = b"1f_y0u'r3_r34d1ng_7h15,_1_h0p3_17'5_b3c4u53_y0u_unr0113d_MD5,_n07_b3c4u53_y0u_g07_RCE_0n_7h3_53rv3r"
+SECRET_KEY = b"kEYlEN97H_12_14"
 
 # High-level description of worldgen
 #
@@ -282,15 +282,15 @@ def generate_grasslands(entities, world):
 
 def generate_signature(blob):
     m = hashlib.md5()
-    m.update(SECRET_KEY)
-    m.update(blob)
+    m.update(SECRET_KEY + blob)
+    # m.update(SECRET_KEY)
+    # m.update(blob)
     return binascii.hexlify(m.digest()).decode()
 
 
 def validate_signature(signature, blob):
     m = hashlib.md5()
-    m.update(SECRET_KEY)
-    m.update(blob)
+    m.update(SECRET_KEY + blob)
     return signature == binascii.hexlify(m.digest()).decode()
 
 
@@ -331,33 +331,65 @@ def generate_world():
         }
     }
 
+import re
+import urllib.parse
+import zlib
 
 def sign(world):
-    worldp = { "tilemaps": world["tilemaps"], "mobs": dict() }
+    blobs = []
+    worldp = { "tilemaps": dict(), "mobs": dict() }
     for location in world["mobs"]:
-        worldp["mobs"][location] = [mob.serialize() for mob in world["mobs"][location]]
-    encoded = b64encode(json.dumps(worldp).encode())
+        obj = {
+            "location": location,
+            "tilemap": b64encode(
+                zlib.compress(
+                    json.dumps(world["tilemaps"][location]).encode()
+                )
+            ).decode(),
+            "mobs": [mob.serialize() for mob in world["mobs"][location]],
+        }
+        blobs.append(b64encode(json.dumps(obj).encode()))
+    encoded = b" ".join(blobs)
     signature = generate_signature(encoded)
     return {
         "signature": signature,
-        "blob": encoded.decode()
+        "blob": urllib.parse.quote(encoded.decode())
     }
+
+def split_base64_chunks(bin):
+    chunks = []
+    while len(bin) > 0:
+        for i in range(len(bin)):
+            if bin[i] not in b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=":
+                chunks.append(bin[:i])
+                bin = bin[i + 1:]
+                break
+        else:
+            break
+    chunks.append(bin)
+    return chunks
 
 
 def validate(packet):
     try:
         packet = json.loads(packet)
         signature = packet["signature"]
-        if generate_signature(packet.get("blob").encode()) != signature:
+        if generate_signature(urllib.parse.unquote_to_bytes(packet.get("blob"))) != signature:
             return None
-        world = json.loads(b64decode(packet.get("blob")))
-        for name in world["mobs"]:
-            for i, serialized in enumerate(world["mobs"][name]):
-                world["mobs"][name][i] = entity.deserialize_entity(serialized)
+        world = { "tilemaps": dict(), "mobs": dict() }
+        for encoded in split_base64_chunks(urllib.parse.unquote_to_bytes(packet.get("blob"))):
+            try:
+                obj = json.loads(b64decode(encoded))
+                world["tilemaps"][obj["location"]] = json.loads(
+                    zlib.decompress(
+                        b64decode(obj["tilemap"])
+                    ).decode()
+                )
+                world["mobs"][obj["location"]] = [entity.deserialize_entity(x) for x in obj["mobs"]]
+            except Exception as e:
+                print(e)
+                pass
         return world
     except Exception as e:
         raise e
         return None
-
-
-if __name__ == "__main__"

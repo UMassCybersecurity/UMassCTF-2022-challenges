@@ -847,6 +847,64 @@ function log(message) {
 const viewportWidth = 24;
 const viewportHeight = 18;
 
+const alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/', '='];
+function splitBase64Chunks(blob) {
+    let chunks = [];
+    let unchanged;
+
+    while (blob.length > 0) {
+        unchanged = blob.length;
+        for (let i = 0; i < blob.length; i++) {
+            if (!alphabet.includes(String.fromCharCode(blob[i]))) {
+                chunks.push(blob.slice(0, i))
+                while (i < blob.length && !alphabet.includes(String.fromCharCode(blob[i])))
+                    i++;
+                blob.splice(0, i);
+                break;
+            }
+        }
+        if (blob.length == unchanged) {
+            chunks.push(blob);
+            break;
+        }
+    }
+    return chunks;
+}
+
+// https://stackoverflow.com/questions/57873879/buffers-and-url-encoding-in-node-js
+const isUrlSafe = (char) => {
+  return /[a-zA-Z0-9\-_~.]+/.test(char)
+}
+
+// const urlEncodeBytes = (buf) => {
+//   let encoded = ''
+//   for (let i = 0; i < buf.length; i++) {
+//     const charBuf = Uint8Array.from('00', 'hex')
+//     charBuf.writeUInt8(buf[i])
+//     const char = charBuf.toString()
+//     // if the character is safe, then just print it, otherwise encode
+//     if (isUrlSafe(char)) {
+//       encoded += char
+//     } else {
+//       encoded += `%${charBuf.toString('hex').toUpperCase()}`
+//     }
+//   }
+//   return encoded
+// }
+
+const urlDecodeBytes = (encoded) => {
+  let decoded = [];
+  for (let i = 0; i < encoded.length; i++) {
+      if (encoded[i] === '%') {
+          decoded.push(parseInt(encoded.substring(i + 1, i + 3), 16))
+          i += 2
+      } else {
+          decoded.push(encoded.charCodeAt(i));
+      }
+  }
+  return decoded
+}
+
 const GAME_STATE = {
     "character": null,
     "mode": "movement",
@@ -860,13 +918,20 @@ const GAME_STATE = {
     "tileMap": null,
     "mobs": [],
     // ---
-    // TODO: We're clearly missing the portals.
     "loadWorld": function (name) {
-        const object = JSON.parse(atob(JSON.parse(window.localStorage.getItem('world')).blob));
-        this.tileMap = object["tilemaps"][name];
-        this.mobs = [];
-        for (let mob of object["mobs"][name]) {
-            this.mobs.push({ ...mob});
+        let decoder = new TextDecoder();
+        const object = JSON.parse(window.localStorage.getItem('world')).blob;
+        const blobs = splitBase64Chunks(urlDecodeBytes(object));
+        for (let blob of blobs) {
+            let decoded = JSON.parse(atob(decoder.decode(new Uint8Array(blob))));
+            if (decoded["location"] !== name) {
+                continue;
+            }
+            this.tileMap = JSON.parse(decoder.decode(fflate.unzlibSync(base64ToBytes(decoded["tilemap"]))));
+            this.mobs = [];
+            for (let mob of decoded["mobs"]) {
+                this.mobs.push({ ...mob});
+            }
         }
     }
 }

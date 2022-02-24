@@ -37,35 +37,55 @@ class Usable(Item):
 
 # How do we model temporary effects?
 class Consumable(Item):
+    def __init__(self, id=None):
+        super().__init__(id)
+        self.max_health = 0
+        self.health = 0
+        self.strength = 0
+        self.constitution = 0
+        self.intelligence = 0
+        self.initiative = 0
+
     def consume(self):
         return [
             { "type": "message", "text": f"You consume the {self.type()}" }
         ]
 
 
-# How do we model the player slots; temporary additions that will be changed by unequipping?
-class Weapon(Item):
-    pass
+class Equippable(Item):
+    def __init__(self, id=None):
+        super().__init__(id)
+        self.max_health = 0
+        self.health = 0
+        self.strength = 0
+        self.constitution = 0
+        self.intelligence = 0
+        self.intelligence_bonus = 0
+        self.initiative = 0
 
 
-class Umbrella(Weapon):
+class Umbrella(Equippable):
+    def __init__(self, id=None):
+        super().__init__(id)
+        self.strength = 1
+    
     def icon(self):
         return "🌂"
 
 
-class Purse(Weapon):
+class Purse(Equippable):
     def icon(self):
         return "👝"
 
-class Torch(Weapon):
+class Torch(Equippable):
     def icon(self):
         return "🪔"
 
-class Axe(Weapon):
+class Axe(Equippable):
     def icon(self):
         return "🪓"
 
-class Raygun(Weapon):
+class Raygun(Equippable):
     def icon(self):
         return "📡"
 

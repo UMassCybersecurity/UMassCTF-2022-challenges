@@ -207,7 +207,6 @@ function serialize(data) {
 }
 
 function deserialize(chunk){
-    console.log(chunk);
     chunk = base64ToBytes(chunk);
     let nonce = chunk[0];
     let key = nonce;
@@ -270,7 +269,6 @@ function queuePacket(data) {
                     "id": id,
                     "data": data
                 };
-                console.log(padded);
                 promiseTracker.inFlight[id] = [resolve, reject, padded];
                 if (promiseTracker.enabled) {
                     socket.send(serialize(padded));
@@ -588,7 +586,6 @@ const MENU_STATE = {
                     }
                     menuState.currentSession.character = response.character;
                     GAME_STATE.character = response.character;
-                    console.log(response.character);
                     menuState.currentMenuName = "main";
                     menuState.updateLabel("character_info", "Current character: " + response.character.name);
                     menuState.enableId("character_info");
@@ -680,7 +677,6 @@ const TILES = [
     load_image("wall.cobalt_stone_1"),
     load_image("floor.black_cobalt_1")
 ];
-console.log(TILES);
 
 const TITLE_COLOR = ["#ff3b00", "#ff5c00", "#ff8400", "#ffa500", "#ffbf00", "#ffe000", "#ffed00"];
 const MAPLE = ["::::    ::::      :::     :::::::::  :::        ::::::::::",
@@ -1177,7 +1173,6 @@ async function handleKeyDownGame(e) {
         break;
     }
     if (response) {
-        console.log(response);
         for (let update of response) {
             console.log(update);
             switch (update.type) {
@@ -1320,7 +1315,6 @@ function renderGameOver() {
     ctx.fillText(GAME_OVER_MESSAGE, 0, 32);
     ctx.fillText("<Press any key to continue.>", 0, 64);
 }
-
 
 // --- TEMPORARY; DO NOT COMMIT TO VC
 async function skipMenu() {

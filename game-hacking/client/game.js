@@ -1069,6 +1069,11 @@ async function handleKeyDownMovementMode(e) {
             "direction": "northwest"
         });
         break;
+    case ".":
+        response = await queuePacket({
+            "type": "wait",
+        });
+        break;
     case ",":
         response = await queuePacket({
             "type": "pickup_all",

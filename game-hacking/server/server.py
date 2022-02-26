@@ -421,6 +421,13 @@ class GameState(object):
                 self.deltas.append({ "type": "message", "text": "Congratulations! UMASS{4nd_J00_d1d_17_w17H0U7_4_80@}" })
                 self.received_island_flag = True
 
+    def wait(self):
+        # pass
+        self.deltas.append({
+            "type": "update_world",
+            "world": worldgen.sign(self.world)
+        })
+
     def find_entity(self, x, y):
         for entity in self.mobs():
             if entity.position["x"] == x and entity.position["y"] == y:
@@ -727,6 +734,7 @@ EXPECTED_FIELDS = {
     "login": ["username", "password"],
     "create_character": ["name", "age", "class", "order", "morality", "bonus"],
     "sign_text": ["id"],
+    "wait": [],
     "move_or_interact": ["direction"],
     "pickup_all": [],
     "drop_item": ["id"],
@@ -758,6 +766,9 @@ def handle_client_packet(message):
         if idx >= 0 and idx < len(SIGN_MESSAGES):
             return lambda x: { "text": SIGN_MESSAGES[idx] }
         return lambda x: { "error": "No such sign!" }
+    elif packet_type == "wait" and validate_fields(message, "wait"):
+        del message["type"]
+        return lambda x: Connection.game_action(x, GameState.wait, message)
     elif packet_type == "move_or_interact" and validate_fields(message, "move_or_interact"):
         del message["type"]
         return lambda x: Connection.game_action(x, GameState.move_or_interact, message)

@@ -325,7 +325,6 @@ class Enemy(Entity):
         super().__init__(x, y)
         self.health = 5
         self.agility = 0
-        self.dexterity = 1
         self.experience = 1
         self.strength = 1
         self.drop = [inventory.Bandaid()]
@@ -335,7 +334,8 @@ class Enemy(Entity):
         return Enemy(0, 0)
 
     def interact(self, game_state):
-        self.health -= 1
+        self.health -= game_state.character.attack_value(self)
+        print("Debug: Dealing {}".format(game_state.character.attack_value(self)))
         base = [
             { "type": "message", "text": f"You hit the {self.type()}." }
         ]

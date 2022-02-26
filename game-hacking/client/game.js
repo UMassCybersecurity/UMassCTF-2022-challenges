@@ -1134,6 +1134,22 @@ async function handleKeyDownInventoryMode(e) {
             }
         }
         break;
+    case "u":
+        {
+            const idx = GAME_STATE.inventory.selected;
+            const item = GAME_STATE.character.inventory[idx];
+            response = await queuePacket({
+                "type": "unequip_item",
+                "id": item.id
+            });
+            if (response.map((x) => x.hasOwnProperty("text") && x.text.includes("No such item")).
+                reduce((a, b) => a || b, false)) {
+                break;
+            }
+            const idx2 = GAME_STATE.character.equipped.findIndex(elm => elm.id === item.id);
+            GAME_STATE.character.equipped.splice(idx2, 1);
+        }
+        break;
     case "c":
         {
             const idx = GAME_STATE.inventory.selected;
@@ -1241,7 +1257,14 @@ async function handleKeyDownGame(e) {
                 window.localStorage.setItem('world', JSON.stringify(update.world));
                 break;
             case "update_player":
-                GAME_STATE.character = update.entity;
+                // Saving this is a gross hack.
+                if (GAME_STATE.character.hasOwnProperty("equipped")) {
+                    const equipped = GAME_STATE.character.equipped;
+                    GAME_STATE.character = update.entity;
+                    GAME_STATE.character.equipped = equipped;
+                } else {
+                    GAME_STATE.character = update.entity;
+                }
                 break;
             case "game_over":
                 window.localStorage.setItem('world', null);

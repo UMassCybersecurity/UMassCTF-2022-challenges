@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
+from util import *
+
 from base64 import b64encode, b64decode
+from functools import reduce
 import asyncio
 import copy
 import hashlib
@@ -30,7 +33,9 @@ CREATE TABLE IF NOT EXISTS users (
     game_state TEXT
 );
 ''')
-cur.execute('''INSERT INTO users (username, password) VALUES (?, ?)''', ("administrator", b'\xf3\xda\xf7y\xd8\x0c\x90]\x8c\xd4m\x90\x80\xc4\x81\x99')) # md5(Lyndell08)
+cur.execute('''SELECT * FROM users WHERE username = 'administrator';''')
+if cur.fetchone() is None:
+    cur.execute('''INSERT INTO users (username, password) VALUES (?, ?)''', ("administrator", b'\xf3\xda\xf7y\xd8\x0c\x90]\x8c\xd4m\x90\x80\xc4\x81\x99')) # md5(Lyndell08)
 con.commit()
 cur.close()
 con.close()
@@ -51,6 +56,13 @@ CLASSES = {
             "intelligence" : 3,
             "initiative"   : 2,
             "start_items"  : lambda: [],
+        },
+        "leveling_stats": {
+            "max_health"   : 1,
+            "strength"     : 1,
+            "constitution" : 1,
+            "intelligence" : 1,
+            "initiative"   : 1,
         }
     },
     "👩⚕️ ": {
@@ -62,6 +74,13 @@ CLASSES = {
             "intelligence" : 3,
             "initiative"   : 1,
             "start_items"  : lambda: [inventory.Bandaid()],
+        },
+        "leveling_stats": {
+            "max_health"   : 1,
+            "strength"     : 1,
+            "constitution" : 1,
+            "intelligence" : 3,
+            "initiative"   : 2,
         }
     },
     "👨🏭": {
@@ -73,6 +92,13 @@ CLASSES = {
             "intelligence" : 1,
             "initiative"   : 1,
             "start_items"  : lambda: [inventory.Torch()],
+        },
+        "leveling_stats": {
+            "max_health"   : 2,
+            "strength"     : 1,
+            "constitution" : 1,
+            "intelligence" : 1,
+            "initiative"   : 1,
         }
     },
     "🥷": {
@@ -84,6 +110,13 @@ CLASSES = {
             "intelligence" : 1,
             "initiative"   : 3,
             "start_items"  : lambda: [],
+        },
+        "leveling_stats": {
+            "max_health"   : 2,
+            "strength"     : 1,
+            "constitution" : 2,
+            "intelligence" : 1,
+            "initiative"   : 2,
         }
     },
     "🧙": {
@@ -95,6 +128,13 @@ CLASSES = {
             "intelligence" : 1,
             "initiative"   : 1,
             "start_items"  : lambda: [inventory.Fentanyl()],
+        },
+        "leveling_stats": {
+            "max_health"   : 3,
+            "strength"     : 1,
+            "constitution" : 1,
+            "intelligence" : 0,
+            "initiative"   : 1,
         }
     },
     "🤡": {
@@ -106,6 +146,13 @@ CLASSES = {
             "intelligence" : 1,
             "initiative"   : 5,
             "start_items"  : lambda: [inventory.Axe()],
+        },
+        "leveling_stats": {
+            "max_health"   : 3,
+            "strength"     : 2,
+            "constitution" : 1,
+            "intelligence" : 1,
+            "initiative"   : 0,
         }
     },
     "👽": {
@@ -117,6 +164,13 @@ CLASSES = {
             "intelligence" : 1,
             "initiative"   : 1,
             "start_items"  : lambda: [inventory.Raygun()],
+        },
+        "leveling_stats": {
+            "max_health"   : 1,
+            "strength"     : 1,
+            "constitution" : 1,
+            "intelligence" : 1,
+            "initiative"   : 1,
         }
     },
     "🦝": {
@@ -128,6 +182,13 @@ CLASSES = {
             "intelligence" : 1,
             "initiative"   : 5,
             "start_items"  : lambda: [],
+        },
+        "leveling_stats": {
+            "max_health"   : 3,
+            "strength"     : 1,
+            "constitution" : 1,
+            "intelligence" : 1,
+            "initiative"   : 1,
         }
     },
     "🦖": {
@@ -139,6 +200,13 @@ CLASSES = {
             "intelligence" : 1,
             "initiative"   : 3,
             "start_items"  : lambda: [],
+        },
+        "leveling_stats": {
+            "max_health"   : 3,
+            "strength"     : 3,
+            "constitution" : 1,
+            "intelligence" : 0,
+            "initiative"   : 0,
         }
     },
     "👨🌾": {
@@ -150,6 +218,13 @@ CLASSES = {
             "intelligence" : 1,
             "initiative"   : 1,
             "start_items"  : lambda: [inventory.Banjo()],
+        },
+        "leveling_stats": {
+            "max_health"   : 1,
+            "strength"     : 2,
+            "constitution" : 1,
+            "intelligence" : 1,
+            "initiative"   : 2,
         }
     },
     "👯": {
@@ -161,6 +236,13 @@ CLASSES = {
             "intelligence" : 3,
             "initiative"   : 2,
             "start_items"  : lambda: [],
+        },
+        "leveling_stats": {
+            "max_health"   : 3,
+            "strength"     : 1,
+            "constitution" : 1,
+            "intelligence" : 1,
+            "initiative"   : 1,
         }
     },
     "🏋️": {
@@ -172,6 +254,13 @@ CLASSES = {
             "intelligence" : 1,
             "initiative"   : 1,
             "start_items"  : lambda: [],
+        },
+        "leveling_stats": {
+            "max_health"   : 1,
+            "strength"     : 3,
+            "constitution" : 1,
+            "intelligence" : 1,
+            "initiative"   : 0,
         }
     },
     "🧜": {
@@ -183,6 +272,13 @@ CLASSES = {
             "intelligence" : 1,
             "initiative"   : 1,
             "start_items"  : lambda: [],
+        },
+        "leveling_stats": {
+            "max_health"   : 3,
+            "strength"     : 3,
+            "constitution" : 3,
+            "intelligence" : 3,
+            "initiative"   : 3,
         }
     },
     "🤠": {
@@ -194,6 +290,13 @@ CLASSES = {
             "intelligence" : 3,
             "initiative"   : 1,
             "start_items"  : lambda: [inventory.BudLite() for _ in range(5)]
+        },
+        "leveling_stats": {
+            "max_health"   : 2,
+            "strength"     : 1,
+            "constitution" : 1,
+            "intelligence" : 1,
+            "initiative"   : 1,
         }
     }
 }
@@ -270,21 +373,18 @@ class Character(object):
     def equip_item(self, item):
         self.equipped.append(item)
         for stat in ["max_health", "health", "strength", "constitution", "intelligence", "initiative"]:
-            # TODO: Update state respectively.
-            pass
+            self.__setattr__(stat, self.__getattribute__(stat) + item.__getattribute__(stat))
 
     def unequip_item(self, id):
         for i, item in enumerate(self.equipped):
             if item.id == id:
                 for stat in ["max_health", "health", "strength", "constitution", "intelligence", "initiative"]:
-                    # TODO: Update state respectively.
-                    pass
+                    self.__setattr__(stat, self.__getattribute__(stat) - item.__getattribute__(stat))
                 return self.equipped.pop(i)
 
     def consume_item(self, item):
         for stat in ["max_health", "health", "strength", "constitution", "intelligence", "initiative"]:
-            # TODO: Update state respectively.
-            pass
+            self.__setattr__(stat, self.__getattribute__(stat) + item.__getattribute__(stat))
 
     def receive_projectile_damage(self, damage):
         self.health -= damage
@@ -297,7 +397,7 @@ class Character(object):
         return base
 
     def receive_attack(self, attack):
-        self.health -= attack.calculate_damage()
+        self.health -= attack.calculate_damage(self)
         base = [
             { "type": "message", "text": attack.describe() },
             { "type": "update_player", "entity": self.serialize() },
@@ -311,8 +411,23 @@ class Character(object):
         if self.experience >= experience_for_level(self.level + 1):
             self.level += 1
             self.experience = 0
-            return [{ "type": "message", "text": f"You level up to {self.level}!" }]
-        return []
+            self.max_health   += CLASSES[self.alliance_class]["leveling_stats"]["max_health"]
+            self.strength     += CLASSES[self.alliance_class]["leveling_stats"]["strength"]
+            self.constitution += CLASSES[self.alliance_class]["leveling_stats"]["constitution"]
+            self.intelligence += CLASSES[self.alliance_class]["leveling_stats"]["intelligence"]
+            self.initiative   += CLASSES[self.alliance_class]["leveling_stats"]["initiative"]
+            return [
+                { "type": "message", "text": f"You level up to {self.level}!" },
+                { "type": "update_player", "entity": self.serialize() }
+            ]
+        return [
+            { "type": "update_player", "entity": self.serialize() }
+        ]
+
+    def attack_value(self, enemy):
+        intelligence_bonus = sum([self.intelligence * x.intelligence_bonus for x in self.equipped])
+        characterizer = self.strength + intelligence_bonus - enemy.strength * 0.25
+        return round(lerp(1.0, 1000.0, max(characterizer, 0) / 1000.0))
 
 
 def distance(a, b):
@@ -347,10 +462,34 @@ class GameState(object):
             if mob.id == id:
                 return self.mobs().pop(i)
 
-    def process_events(self, events):
+    def find_mob(self, id):
+        for i, mob in enumerate(self.mobs()):
+            if mob.id == id:
+                return self.mobs()[i]
+
+    def process_events(self, events, time_step=0):
         processed = []
+        for i, queued in enumerate(self.action_queue):
+            if queued["tu"] <= time_step:
+                queued["tu"] = 0
+                events.append(self.action_queue.pop(i))
+                if "id" in queued:
+                    self.find_mob(queued["id"]).lock = False
+            else:
+                queued["tu"] -= time_step
+                print(time_step, queued["tu"], queued["tu"] - time_step)
         for event in events:
-            if event["type"] == "become":
+            if "tu" in event and event["tu"] > time_step:
+                event["tu"] -= time_step
+                self.action_queue.append(event)
+                if "id" in event:
+                    mob = self.find_mob(event["id"])
+                    if mob is None:
+                        # We'll assume the mob deletion was processed before we
+                        # got to the move event.
+                        continue
+                    mob.lock = True
+            elif event["type"] == "become":
                 self.replace_mob(event["id"], event["replacement"])
                 processed.append({
                     "type": "become",
@@ -359,6 +498,14 @@ class GameState(object):
                 })
             elif event["type"] == "delete_mob":
                 self.delete_mob(event["id"])
+                processed.append(event)
+            elif event["type"] == "move_mob":
+                mob = self.find_mob(event["id"])
+                if mob is None:
+                    # We'll assume the mob deletion was processed before we got
+                    # to the move event.
+                    continue
+                mob.position = event["new_position"]
                 processed.append(event)
             elif event["type"] == "teleport_player":
                 self.current_world = event["target_world"]
@@ -480,16 +627,23 @@ class GameState(object):
             return
         idx = self.find_item(id)
         item = self.character.inventory[idx]
-        if "weapon" not in item.classes():
+        if item in self.character.equipped:
+            events = self.process_events([
+                { "type": "message", "text": f"{item.type()} already equipped." },
+            ])
+            self.deltas += events
+            return
+        if "equippable" not in item.classes():
             events = self.process_events([
                 { "type": "message", "text": f"You cannot equip a {item.type()}!" },
             ])
             self.deltas += events
             return
-        self.character.inventory.pop(idx)
+        # self.character.inventory.pop(idx)
         self.character.equip_item(item)
         events = self.process_events([
             { "type": "message", "text": f"You equip the {item.type()}." },
+            { "type": "update_player", "entity": self.character.serialize() }
         ])
         self.deltas += events
 
@@ -501,9 +655,10 @@ class GameState(object):
             ])
             self.deltas += events
             return
-        self.character.inventory.append(item)
+        # self.character.inventory.append(item)
         events = self.process_events([
             { "type": "message", "text": f"You unequip the {item.type()}" },
+            { "type": "update_player", "entity": self.character.serialize() }
         ])
         self.deltas += events
 
@@ -520,6 +675,7 @@ class GameState(object):
         self.character.consume_item(item)
         events = self.process_events([
             { "type": "message", "text": f"You eat the {item.type()}. Delicious!" },
+            { "type": "update_player", "entity": self.character.serialize() }
         ])
         self.deltas += events
 

@@ -987,35 +987,33 @@ function renderViewport() {
     let line;
     if (GAME_STATE.mode === "inventory") {
 
-        let rectWidth = 0;
         let rectHeight = 0;
         for (let y = 0; y < GAME_STATE.character.inventory.length; y++) {
             line = GAME_STATE.character.inventory[y]["inventory_view"];
             line = (GAME_STATE.inventory.selected == y ? "> " : "  ") + line;
-            console.log(ctx.measureText(line));
-            rectWidth = Math.max(rectWidth, ctx.measureText(line).width);
             rectHeight += 12;
         }
+        rectHeight = Math.max(rectHeight, tileHeight * (viewportHeight / 2));
 
         ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, rectWidth + 64, rectHeight + (64 + 32));
+        ctx.fillRect(0, 0, tileWidth * viewportWidth, rectHeight);
         ctx.fillStyle = "#000000";
         for (let y = 1; y < 1 + GAME_STATE.character.inventory.length; y++) {
             line = GAME_STATE.character.inventory[y - 1]["inventory_view"];
             line = (GAME_STATE.inventory.selected == y - 1 ? "> " : "  ") + line;
+            line = (GAME_STATE.character.equipped && GAME_STATE.character.equipped.find(item => item.id === GAME_STATE.character.inventory[y - 1].id)) ? line + "(equipped)" : line;
             ctx.fillText(line, 0, tileHeight + 16 * y);
         }
 
 
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(canvas.width - 256, 0, 256, rectHeight + (64 + 32));
-        ctx.fillStyle = "#000000";
         ctx.fillText(`name: ${GAME_STATE.character["name"]}`, canvas.width - 256, tileHeight + 16 * 0);
         ctx.fillText(`age: ${GAME_STATE.character["age"]}`, canvas.width - 256, tileHeight + 16 * 1);
         ctx.fillText(`hp: ${GAME_STATE.character["health"]}/${GAME_STATE.character["max_health"]}`, canvas.width - 256, tileHeight + 16 * 2);
-        ctx.fillText(`str: ${GAME_STATE.character["strength"]}`, canvas.width - 256, tileHeight + 16 * 3);
-        ctx.fillText(`con: ${GAME_STATE.character["constitution"]}`, canvas.width - 256, tileHeight + 16 * 4);
-        ctx.fillText(`dex: ${GAME_STATE.character["initiative"]}`, canvas.width - 256, tileHeight + 16 * 5);
+        ctx.fillText(`lvl: ${GAME_STATE.character["level"]}`, canvas.width - 256, tileHeight + 16 * 3);
+        ctx.fillText(`exp: ${GAME_STATE.character["experience"]}`, canvas.width - 256, tileHeight + 16 * 4);
+        ctx.fillText(`str: ${GAME_STATE.character["strength"]}`, canvas.width - 256, tileHeight + 16 * 5);
+        ctx.fillText(`con: ${GAME_STATE.character["constitution"]}`, canvas.width - 256, tileHeight + 16 * 6);
+        ctx.fillText(`dex: ${GAME_STATE.character["initiative"]}`, canvas.width - 256, tileHeight + 16 * 7);
     }
 }
 
@@ -1123,7 +1121,7 @@ async function handleKeyDownInventoryMode(e) {
                 reduce((a, b) => a || b, false)) {
                 break;
             }
-            GAME_STATE.character.inventory.splice(idx, 1);
+            // GAME_STATE.character.inventory.splice(idx, 1);
             if (GAME_STATE.character.hasOwnProperty("equipped")) {
                 GAME_STATE.character.equipped.push(item);
             } else {

@@ -13,6 +13,7 @@ import worldgen
 def deserialize_entity(blob):
     mapping = {
         "projectile": Projectile,
+        "itemprojectile": ItemProjectile,
         "pickup": Pickup,
         "decoration": Decoration,
         "sign": Sign,
@@ -126,6 +127,27 @@ class Projectile(Entity):
             "world_view": self.world_view,
         })
         return base
+
+
+class ItemProjectile(Projectile):
+    def __init__(self, target_x, target_y, damage, item, x, y):
+        super().__init__(target_x, target_y, damage, item.icon(), x, y)
+        self.item = item
+
+    def tick(self, game_state):
+        events = super().tick(game_state)
+        old_x = None
+        old_y = None
+        for event in events:
+            if event["type"] == "move_mob_animate":
+                old_x = event["new_position"]["x"]
+                old_y = event["new_position"]["y"]
+            elif event["type"] == "delete_mob" and old_x is not None and old_y is not None:
+                x, y = game_state.find_free_space(old_x, old_y)
+                pickup = Pickup(self.item, x, y)
+                game_state.mobs().append(pickup)
+                events.append({ "type": "new_mob", "entity": pickup.serialize() })
+        return events
 
 
 class Decoration(Entity):

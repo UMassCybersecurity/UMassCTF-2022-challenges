@@ -536,11 +536,11 @@ class GameState(object):
             start_y_offset = 1
         elif target.position["y"] < self.position["y"]:
             start_y_offset = -1
-        projectile = entity.Projectile(
+        projectile = entity.ItemProjectile(
             target.position["x"],
             target.position["y"],
             5,
-            item.icon(),
+            item,
             self.position["x"] + start_x_offset,
             self.position["y"] + start_y_offset
         )

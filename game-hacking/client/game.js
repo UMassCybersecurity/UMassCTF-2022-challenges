@@ -1123,7 +1123,7 @@ async function handleKeyDownInventoryMode(e) {
                 "type": "equip_item",
                 "id": item.id
             });
-            if (response.map((x) => x.hasOwnProperty("text") && x.text.includes("You cannot equip a")).
+            if (response.map((x) => x.hasOwnProperty("text") && (x.text.includes("Too many items equipped") || x.text.includes("You cannot equip a"))).
                 reduce((a, b) => a || b, false)) {
                 break;
             }

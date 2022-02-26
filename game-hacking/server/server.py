@@ -465,6 +465,12 @@ class GameState(object):
         self.deltas += events
 
     def equip_item(self, id):
+        if len(self.character.equipped) >= 5:
+            events = self.process_events([
+                { "type": "message", "text": "Too many items equipped." },
+            ])
+            self.deltas += events
+            return
         idx = self.find_item(id)
         item = self.character.inventory[idx]
         if "weapon" not in item.classes():

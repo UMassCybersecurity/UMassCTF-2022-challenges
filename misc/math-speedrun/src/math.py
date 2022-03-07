@@ -1,5 +1,6 @@
 import random
-import time
+# import time
+import sys
 
 def flag():
     print("UMASS{OOGABOOGA}")
@@ -26,23 +27,30 @@ def mathproblem():
         operation = "//"
     print("{} {} {}".format(a, operation, b))
 
-    if int(input()) == answer:
-        print("correct!")
-        return True
-    else:
-        return False
+    try:
+        if int(input()) == answer:
+            print("Correct!")
+            return True
+        else:
+            print("Incorrect.")
+            return False
+    except KeyboardInterrupt:
+        sys.exit(0)
 
 if __name__ == '__main__':
-    print("You must solve 1000 of these math problems that are outputted in the following format {number} {operation} {number} within 10 seconds to get the flag. Good luck! \n")
+    print("You must solve 1000 of these math problems that are outputted in the following format {number} {operation} {number} to get the flag. \nDivision is integer division using the // operator. Good luck! \n")
     correct = 0
     numprobs = 2
-    start = time.time()
+    # start = time.time()
     for i in range(numprobs):
         if mathproblem():
             correct += 1
-        if time.time() - start >= 10:
-            print("Timeout. You took too long.")
-            sys.exit(0)
-            break
+        # if time.time() - start >= 10:
+        #     print("Timeout. You took too long.")
+        #     sys.exit(0)
+        #     break
     if correct == numprobs:
         flag()
+    else:
+        print("You didn't get all the problems correct. Try again.")
+    sys.exit(0)

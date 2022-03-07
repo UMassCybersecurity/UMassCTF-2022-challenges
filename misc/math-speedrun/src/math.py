@@ -3,7 +3,7 @@ import random
 import sys
 
 def flag():
-    print("UMASS{OOGABOOGA}")
+    print("UMASS{s3v3naten1n3}")
     sys.exit(0)
 
 
@@ -38,9 +38,9 @@ def mathproblem():
         sys.exit(0)
 
 if __name__ == '__main__':
-    print("You must solve 1000 of these math problems that are outputted in the following format {number} {operation} {number} to get the flag. \nDivision is integer division using the // operator. Good luck! \n")
+    print("You must solve 1000 of these math problems that are outputted in the following format {number} {operation} {number} to get the flag. \nDivision is integer division using the // operator. \nGood luck! \n")
     correct = 0
-    numprobs = 2
+    numprobs = 1000 
     # start = time.time()
     for i in range(numprobs):
         if mathproblem():

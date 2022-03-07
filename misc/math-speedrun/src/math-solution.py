@@ -9,6 +9,11 @@ def netcat(hostname, port, content):
         data = s.recv(1024)
         if len(data) == 0:
             break
-        print("Received:", repr(data))
+        print("\nReceived:", repr(data))
+        senddata = 5
+        s.sendall(senddata.to_bytes(50, 'big'))
     print("Connection closed.")
     s.close()
+
+if __name__ == "__main__":
+    netcat("127.0.0.1", 8085, "")

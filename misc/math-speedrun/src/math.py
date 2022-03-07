@@ -3,6 +3,7 @@ import time
 
 def flag():
     print("UMASS{OOGABOOGA}")
+    sys.exit(0)
 
 
 def mathproblem():
@@ -41,6 +42,7 @@ if __name__ == '__main__':
             correct += 1
         if time.time() - start >= 10:
             print("Timeout. You took too long.")
+            sys.exit(0)
             break
     if correct == numprobs:
         flag()

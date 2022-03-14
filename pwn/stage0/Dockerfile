@@ -4,6 +4,12 @@ RUN apt-get update && apt-get install -y \
   emacs \
   libsixel-dev \
   && rm -rf /var/lib/apt/lists/*
+COPY ./emacs/ /tmp/emacs/
+WORKDIR /tmp/emacs/
+RUN sed -i 's/SIGSTKSZ/1024/' src/sysdep.c
+RUN ./autogen.sh
+RUN ./configure --with-modules --with-libgmp --with-json --with-threads --with-wide-int --with-zlib --with-x-toolkit=gtk3 --with-dumping=unexec
+RUN make
 COPY ./sixel-el/ /tmp/sixel-el/
 WORKDIR /tmp/sixel-el/
 RUN make

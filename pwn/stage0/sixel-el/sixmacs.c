@@ -4,9 +4,11 @@
 #include <stdio.h>
 
 #include <emacs-module.h>
-#include <sixel.h>
+#include <sixel/sixel.h>
 
 #include "md5.c"
+
+static sixel_allocator_t *allocator;
 
 // ---
 
@@ -26,6 +28,14 @@ static int inuse[CACHESZ];
 
 // ---
 
+void *mymalloc(size_t size) {
+		void *res = malloc(size);
+		FILE *fp = fopen("/tmp/log.txt", "a+");
+		fprintf(fp, "mymalloc: %ld: %p\n", size, res);
+		fclose(fp);
+		return res;
+}
+
 int plugin_is_GPL_compatible;
 
 void panic(emacs_env *ENV, char *message)
@@ -39,14 +49,9 @@ void panic(emacs_env *ENV, char *message)
 emacs_value decode_sixel(emacs_env *ENV, ptrdiff_t
 						 NARGS, emacs_value *ARGS, void *DATA)
 {
+		FILE *fp = fopen("/tmp/log.txt", "a+");
+		
 		assert(NARGS == 1);
-
-		SIXELSTATUS status = SIXEL_FALSE;
-		sixel_allocator_t *allocator;
-		status = sixel_allocator_new(&allocator, NULL, NULL, NULL, NULL);
-		if (SIXEL_FAILED(status)) {
-				panic(ENV, "Failed to create allocator.");
-		}
 
 		int pwidth, pheight, ncolors;
 		unsigned char *palette;
@@ -67,19 +72,19 @@ emacs_value decode_sixel(emacs_env *ENV, ptrdiff_t
 		md5(buf, len);
 		for (int i = 0; i < CACHESZ; i++) {
 				if (cache_identifiers[i].h0 == h0 && cache_identifiers[i].h1 == h1 && cache_identifiers[i].h2 == h2 && cache_identifiers[i].h3 == h3) {
-						printf("\nFound cached entry: %p\n", *((void **)cache[i]));
+						fprintf(fp, "\nFound cached entry: %p\n", *((void **)cache[i]));
 						return cache[i];
 				}
 		}
 
 		sixel_decode_raw(buf, len, &pixels, &pwidth, &pheight, &palette, &ncolors, allocator);
 
-		printf("Alloc: %p\n", pixels);
-		printf("Hexdump:\n");
+		fprintf(fp, "Alloc: %p\n", pixels);
+		fprintf(fp, "Hexdump:\n");
 		for (int i = 0; i < pwidth * pheight; i++) {
-				printf("%.2x", pixels[i]);
+				fprintf(fp, "%.2x", pixels[i]);
 		}
-		printf("\n");
+		fprintf(fp, "\n");
 
 		ptrdiff_t output_len = 256 + 12 * (pwidth * pheight);
 		char *output, *cur;
@@ -107,7 +112,7 @@ emacs_value decode_sixel(emacs_env *ENV, ptrdiff_t
 						cache_identifiers[i].h1 = h1;
 						cache_identifiers[i].h2 = h2;
 						cache_identifiers[i].h3 = h3;
-						printf("sizeof: %ld\n", sizeof(struct emacs_value_tag));
+						fprintf(fp, "sizeof: %ld\n", sizeof(struct emacs_value_tag));
 						cache[i] = malloc(sizeof(struct emacs_value_tag));
 						cache[i]->v = *((void **)ret);
 						inuse[i] = 1;
@@ -134,15 +139,14 @@ emacs_value decode_sixel(emacs_env *ENV, ptrdiff_t
 		}
 
 		for (int i = 0; i < CACHESZ; i++) {
-				printf("%.2d: [%c] %p\n", i, inuse[i] ? 'x' : ' ', cache[i]);
+				fprintf(fp, "%.2d: [%c] %p\n", i, inuse[i] ? 'x' : ' ', cache[i]);
 		}
-		printf("\n");
-
+		fprintf(fp, "\n");
+		fclose(fp);
 		free(buf);
 		free(output);
 		sixel_allocator_free(allocator, palette);
 		// sixel_allocator_free(allocator, pixels);
-		sixel_allocator_unref(allocator);
 		return ret;
 
 }
@@ -155,6 +159,13 @@ int emacs_module_init(struct emacs_runtime *rt)
 		emacs_env *env = rt->get_environment(rt);
 		if (env->size < sizeof (*env))
 				return 2;
+
+		SIXELSTATUS status = SIXEL_FALSE;
+		status = sixel_allocator_new(&allocator, mymalloc, NULL, NULL, NULL);
+		if (SIXEL_FAILED(status)) {
+				/* panic(env, "Failed to create allocator."); */
+				return 1;
+		}
 
 		memset(cache_identifiers, '\0', sizeof(cache_identifiers));
 		memset(cache, '\0', sizeof(cache));

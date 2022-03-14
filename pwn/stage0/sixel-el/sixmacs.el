@@ -31,12 +31,12 @@
               (push (list (match-beginning 0) (match-end 0)) matches)))))
       (reverse matches))))
 
-(defun sixplayground-on-post-command ()
+(defun sixplayground-on-post-command (&rest args)
   (when (buffer-modified-p (get-buffer "*scratch*"))
     (sixplayground-parse)
     (set-buffer-modified-p nil)))
 
-(add-hook 'post-command-hook #'sixplayground-on-post-command)
+;; (add-hook 'post-command-hook #'sixplayground-on-post-command)
 ;; (progn (remove-hook 'post-command-hook #'sixplayground-on-post-command)
 ;;        (dolist (overlay sixplayground-overlays)
 ;;          (delete-overlay overlay)))

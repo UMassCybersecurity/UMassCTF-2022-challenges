@@ -2,7 +2,7 @@ TARGET = sixmacs.so
 
 CC = gcc
 
-CFLAGS = -fPIC -Wall -I/tmp/emacs/src/
+CFLAGS = -fPIC -Wall
 
 SRC = sixmacs.c
 OBJ = $(SRC:.c=.o)

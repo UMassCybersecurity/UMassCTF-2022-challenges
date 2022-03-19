@@ -58,24 +58,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/*
-// This constant can also be computed with the following algorithm:
-const base64abc = [],
-    A = "A".charCodeAt(0),
-    a = "a".charCodeAt(0),
-    n = "0".charCodeAt(0);
-for (let i = 0; i < 26; ++i) {
-    base64abc.push(String.fromCharCode(A + i));
-}
-for (let i = 0; i < 26; ++i) {
-    base64abc.push(String.fromCharCode(a + i));
-}
-for (let i = 0; i < 10; ++i) {
-    base64abc.push(String.fromCharCode(n + i));
-}
-base64abc.push("+");
-base64abc.push("/");
-*/
 const base64abc = [
     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
     "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
@@ -84,17 +66,6 @@ const base64abc = [
     "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "+", "/"
 ];
 
-/*
-// This constant can also be computed with the following algorithm:
-const l = 256, base64codes = new Uint8Array(l);
-for (let i = 0; i < l; ++i) {
-    base64codes[i] = 255; // invalid character
-}
-base64abc.forEach((char, index) => {
-    base64codes[char.charCodeAt(0)] = index;
-});
-base64codes["=".charCodeAt(0)] = 0; // ignored anyway, so we just need to prevent an error
-*/
 const base64codes = [
     255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
     255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
@@ -328,13 +299,13 @@ const MENU_STATE = {
                 "label": "Start Game",
                 "enabled": false,
                 "action": (menuState) => {
+                    renderLoading();
                     GAME_STATE.loadWorld("grasslands");
                     window.removeEventListener('load', renderMenu);
                     document.removeEventListener('keydown', handleKeyDownMenu);
                     window.addEventListener('load', renderViewport);
                     document.addEventListener('keydown', handleKeyDownGame);
                     canvas.addEventListener('click', handleMouseClickGame);
-                    renderViewport();
                 }
             },
             {
@@ -772,13 +743,13 @@ function renderMenu() {
 function handleKeyDownMenu(e) {
     const entities = MENU_STATE.currentMenu().filter((ent) => ent.enabled);
     const entity = entities[MENU_STATE.currentItem];
-    console.log(e.key);
     switch (e.key) {
     case "ArrowUp":
         if (MENU_STATE.currentItem > 0) {
             MENU_STATE.currentItem--;
         }
         e.preventDefault();
+        renderMenu();
         break;
     case "ArrowDown":
         const upperBound = MENU_STATE.currentMenu().filter((ent) => ent.enabled).length;
@@ -786,6 +757,7 @@ function handleKeyDownMenu(e) {
             MENU_STATE.currentItem++;
         }
         e.preventDefault();
+        renderMenu();
         break;
     case "ArrowRight":
         if (entity.type == "numerical_range" && entity.value < entity.maximum) {
@@ -794,6 +766,7 @@ function handleKeyDownMenu(e) {
             entity.index++;
         }
         e.preventDefault();
+        renderMenu();
         break;
     case "ArrowLeft":
         if (entity.type == "numerical_range" && entity.value > entity.minimum) {
@@ -802,10 +775,13 @@ function handleKeyDownMenu(e) {
             entity.index--;
         }
         e.preventDefault();
+        renderMenu();
         break;
     case "Enter":
         if (entity.type == "button") {
             entity.action(MENU_STATE);
+        } else {
+            renderMenu();
         }
         MENU_STATE.currentItem = 0;
         break;
@@ -819,15 +795,16 @@ function handleKeyDownMenu(e) {
             MENU_STATE.currentMenuName = "main";
             MENU_STATE.currentItem = 0;
         }
+        renderMenu();
         break;
     default:
         e.preventDefault();
         if ((entity.type == "entry" || entity.type == "password") && e.key.length == 1) {
             entity.content += e.key;
         }
+        renderMenu();
         break;
     }
-    renderMenu();
 }
 
 window.addEventListener('load', renderMenu);
@@ -935,7 +912,16 @@ const GAME_STATE = {
                 this.mobs.push({ ...mob});
             }
         }
+        renderViewport();
     }
+}
+
+function renderLoading() {
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = '24px monospace';
+    ctx.fillText("Loading...", 16, 16);
 }
 
 function renderViewport() {

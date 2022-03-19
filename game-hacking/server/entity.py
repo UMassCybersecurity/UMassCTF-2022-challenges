@@ -24,6 +24,9 @@ def deserialize_entity(blob):
         "madsun": MadSun,
         "volcano": Volcano,
         "sentientstatue": SentientStatue,
+        "gman": Gman,
+        "snowboi": Snowboi,
+        "pingu": Pingu,
         "santaclaus": SantaClaus,
         "portal": Portal,
         "correcthorsebatteryaward": CorrectHorseBatteryAward
@@ -199,12 +202,6 @@ class Pickup(Entity):
         return e
 
 
-SIGN_TEXT = [
-    "Welcome to MapleQuest!",
-    "You deserve a gift: UMASS{83H0LD_73h_S19nM4s73r}"
-]
-
-
 class Sign(Entity):
     """A signpost that the player can read.
 
@@ -325,10 +322,12 @@ class Enemy(Entity):
         super().__init__(x, y)
         self.health = 5
         self.agility = 0
-        self.experience = 1
+        self.experience = 5
         self.strength = 1
+        self.accuracy = 1
         self.drop = [inventory.Bandaid()]
         self.lock = False
+        self.attack_type = combat.SharpAttack
 
     def construct_empty():
         return Enemy(0, 0)
@@ -341,7 +340,7 @@ class Enemy(Entity):
         ]
         if self.health <= 0:
             base += [
-                { "type": "message", "text": f"The {self.type()} dies!" },
+                { "type": "message", "text": f"The {self.type()} disappears!" },
                 { "type": "player_experience", "value": self.experience },
                 {
                     "type": "become",
@@ -364,8 +363,8 @@ class Enemy(Entity):
         if dist >= 10:
             return []
         elif dist < 2:
-            if random.randint(1, round(lerp(10, 1, self.experience / 100.0))) == 1:
-                return game_state.character.receive_attack(combat.SharpAttack(self))
+            if random.randint(1, round(lerp(10, 1, self.accuracy / 100.0))) == 1:
+                return game_state.character.receive_attack(self.attack_type(self))
             else:
                 return [{ "type": "message", "text": f"The {self.type()} misses!" }]
         else:
@@ -391,6 +390,8 @@ class Enemy(Entity):
             "health": self.health,
             "experience": self.experience,
             "strength": self.strength,
+            "agility": self.agility,
+            "accuracy": self.accuracy,
             "drop": [x.serialize() for x in self.drop]
         })
         return base
@@ -422,7 +423,7 @@ class ThrowingEnemy(Enemy):
         if dist >= 10:
             return []
         elif dist < 2:
-            return game_state.character.receive_attack(combat.SharpAttack(self))
+            return game_state.character.receive_attack(self.attack_type(self))
         else:
             try:
                 if random.choice([1, 2]) == 1:
@@ -474,6 +475,12 @@ class Zombie(Enemy):
 
 
 class MagicMike(Enemy):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.attack_type = combat.MagicAttack
+        self.agility = 1
+        self.experience = 10
+
     def construct_empty():
         return MagicMike(0, 0)
 
@@ -486,6 +493,12 @@ class MagicMike(Enemy):
 
 
 class WoodlandMonster(Enemy):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.attack_type = combat.MagicAttack
+        self.strength = 2
+        self.experience = 10
+
     def construct_empty():
         return WoodlandMonster(0, 0)
 
@@ -497,6 +510,14 @@ class WoodlandMonster(Enemy):
         return base
 
 class MadSun(Enemy):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.attack_type = combat.BurningAttack
+        self.strength = 2
+        self.accuracy = 20
+        self.agility = 3
+        self.experience = 30
+
     def construct_empty():
         return MadSun(0, 0)
 
@@ -509,6 +530,13 @@ class MadSun(Enemy):
 
 
 class Volcano(ThrowingEnemy):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.attack_type = combat.BurningAttack
+        self.health = 10
+        self.accuracy = 10
+        self.experience = 50
+
     def construct_empty():
         return Volcano(0, 0)
 
@@ -525,6 +553,13 @@ class Volcano(ThrowingEnemy):
 
 
 class SentientStatue(Enemy):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.attack_type = combat.BurningAttack
+        self.health = 20
+        self.accuracy = 30
+        self.experience = 70
+
     def construct_empty():
         return SentientStatue(0, 0)
 
@@ -536,11 +571,75 @@ class SentientStatue(Enemy):
         return base
 
 
+class Gman(Enemy):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.attack_type = combat.MagicAttack
+        self.health = 20
+        self.accuracy = 50
+        self.agility = 3
+        self.experience = 150
+
+    def construct_empty():
+        return Gman(0, 0)
+
+    def serialize(self):
+        base = super().serialize()
+        base.update({
+            "world_view": "🕴️",
+        })
+        return base
+
+
+class Snowboi(Enemy):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.attack_type = combat.FreezeAttack
+        self.accuracy = 50
+        self.strength = 100
+        self.agility = 3
+        self.experience = 300
+
+    def construct_empty():
+        return Snowboi(0, 0)
+
+    def serialize(self):
+        base = super().serialize()
+        base.update({
+            "world_view": "☃️",
+        })
+        return base
+
+
+class Pingu(Enemy):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.attack_type = combat.FreezeAttack
+        self.health = 100
+        self.accuracy = 50
+        self.strength = 100
+        self.agility = 5
+        self.experience = 500
+
+    def construct_empty():
+        return Pingu(0, 0)
+
+    def serialize(self):
+        base = super().serialize()
+        base.update({
+            "world_view": "🐧",
+        })
+        return base
+
+
 class SantaClaus(Enemy):
     def __init__(self, x, y):
         super().__init__(x, y)
         self.health = 9999
-        self.experience = 999
+        self.experience = 9999
+        self.agility = 10
+        self.strength = 100
+        self.accuracy = 80
 
     def construct_empty():
         return SantaClaus(0, 0)
@@ -641,5 +740,5 @@ class CorrectHorseBatteryAward(Entity):
 world_associations = {
     "grasslands": [Zombie, MagicMike, WoodlandMonster],
     "desert": [MadSun, Volcano, SentientStatue],
-    "snowland": [SantaClaus],
+    "snowland": [Gman, Snowboi, Pingu],
 }

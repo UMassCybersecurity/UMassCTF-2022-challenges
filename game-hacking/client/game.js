@@ -772,17 +772,20 @@ function renderMenu() {
 function handleKeyDownMenu(e) {
     const entities = MENU_STATE.currentMenu().filter((ent) => ent.enabled);
     const entity = entities[MENU_STATE.currentItem];
+    console.log(e.key);
     switch (e.key) {
     case "ArrowUp":
         if (MENU_STATE.currentItem > 0) {
             MENU_STATE.currentItem--;
         }
+        e.preventDefault();
         break;
     case "ArrowDown":
         const upperBound = MENU_STATE.currentMenu().filter((ent) => ent.enabled).length;
         if (MENU_STATE.currentItem < upperBound - 1) {
             MENU_STATE.currentItem++;
         }
+        e.preventDefault();
         break;
     case "ArrowRight":
         if (entity.type == "numerical_range" && entity.value < entity.maximum) {
@@ -790,6 +793,7 @@ function handleKeyDownMenu(e) {
         } else if (entity.type == "choice" && entity.index < entity.choices.length - 1) {
             entity.index++;
         }
+        e.preventDefault();
         break;
     case "ArrowLeft":
         if (entity.type == "numerical_range" && entity.value > entity.minimum) {
@@ -797,6 +801,7 @@ function handleKeyDownMenu(e) {
         } else if (entity.type == "choice" && entity.index > 0) {
             entity.index--;
         }
+        e.preventDefault();
         break;
     case "Enter":
         if (entity.type == "button") {
@@ -816,6 +821,7 @@ function handleKeyDownMenu(e) {
         }
         break;
     default:
+        e.preventDefault();
         if ((entity.type == "entry" || entity.type == "password") && e.key.length == 1) {
             entity.content += e.key;
         }
@@ -1021,7 +1027,10 @@ function renderViewport() {
 async function handleKeyDownMovementMode(e) {
     let response;
     switch (e.key) {
-    case "8" :
+    case "ArrowUp":
+        e.preventDefault();
+        // Fallthrough.
+    case "8":
         response = await queuePacket({
             "type": "move_or_interact",
             "direction": "north"
@@ -1033,6 +1042,9 @@ async function handleKeyDownMovementMode(e) {
             "direction": "northeast"
         });
         break;
+    case "ArrowRight":
+        e.preventDefault();
+        // Fallthrough.
     case "6":
         response = await queuePacket({
             "type": "move_or_interact",
@@ -1045,6 +1057,9 @@ async function handleKeyDownMovementMode(e) {
             "direction": "southeast"
         });
         break;
+    case "ArrowDown":
+        e.preventDefault();
+        // Fallthrough.
     case "2":
         response = await queuePacket({
             "type": "move_or_interact",
@@ -1057,6 +1072,9 @@ async function handleKeyDownMovementMode(e) {
             "direction": "southwest"
         });
         break;
+    case "ArrowLeft":
+        e.preventDefault();
+        // Fallthrough.
     case "4":
         response = await queuePacket({
             "type": "move_or_interact",
@@ -1090,15 +1108,25 @@ async function handleKeyDownMovementMode(e) {
 async function handleKeyDownInventoryMode(e) {
     let response;
     switch (e.key) {
+    case "ArrowUp":
+        e.preventDefault();
+        // Fallthrough.
     case "2":
         if (GAME_STATE.inventory.selected < GAME_STATE.character.inventory.length - 1) {
             GAME_STATE.inventory.selected++;
         }
         break;
+    case "ArrowDown":
+        e.preventDefault();
+        // Fallthrough.
     case "8":
         if (GAME_STATE.inventory.selected > 0) {
             GAME_STATE.inventory.selected--;
         }
+        break;
+    case "ArrowRight":
+    case "ArrowLeft":
+        e.preventDefault();
         break;
     case "d":
         {
@@ -1343,35 +1371,35 @@ function renderGameOver() {
 }
 
 // --- TEMPORARY; DO NOT COMMIT TO VC
-async function skipMenu() {
-    let response = await queuePacket({
-        "type": "register",
-        "username": "Jakob",
-        "password": "test",
-    });
-    console.log(response);
-    GAME_STATE.character = response.character;
-    TOKEN = response.token;
-    response = await queuePacket({
-        "type"     : "create_character",
-        "name"     : "jakob",
-        "age"      : 18,
-        "class"    : "🤠 post malone",
-        "order"    : "lawful",
-        "morality" : "evil",
-        "bonus"    : "🌂 umbrella (weapon)",
-    });
-    GAME_STATE.character = response.character;
-    window.localStorage.setItem('world', JSON.stringify(response.world));
-    TOKEN = response.token;
+// async function skipMenu() {
+//     let response = await queuePacket({
+//         "type": "register",
+//         "username": "Jakob",
+//         "password": "test",
+//     });
+//     console.log(response);
+//     GAME_STATE.character = response.character;
+//     TOKEN = response.token;
+//     response = await queuePacket({
+//         "type"     : "create_character",
+//         "name"     : "jakob",
+//         "age"      : 18,
+//         "class"    : "🤠 post malone",
+//         "order"    : "lawful",
+//         "morality" : "evil",
+//         "bonus"    : "🌂 umbrella (weapon)",
+//     });
+//     GAME_STATE.character = response.character;
+//     window.localStorage.setItem('world', JSON.stringify(response.world));
+//     TOKEN = response.token;
 
-    GAME_STATE.loadWorld("grasslands");
-    window.removeEventListener('load', renderMenu);
-    document.removeEventListener('keydown', handleKeyDownMenu);
-    window.addEventListener('load', renderViewport);
-    document.addEventListener('keydown', handleKeyDownGame);
-    canvas.addEventListener('click', handleMouseClickGame);
-    renderViewport();
-}
-skipMenu();
+//     GAME_STATE.loadWorld("grasslands");
+//     window.removeEventListener('load', renderMenu);
+//     document.removeEventListener('keydown', handleKeyDownMenu);
+//     window.addEventListener('load', renderViewport);
+//     document.addEventListener('keydown', handleKeyDownGame);
+//     canvas.addEventListener('click', handleMouseClickGame);
+//     renderViewport();
+// }
+// skipMenu();
 // ---

@@ -72,7 +72,7 @@ CLASSES = {
             "initiative"   : 1,
         }
     },
-    "👩⚕️ ": {
+    "👩‍⚕️": {
         "name": "medic",
         "starting_stats": {
             "max_health"   : 5,
@@ -90,7 +90,7 @@ CLASSES = {
             "initiative"   : 2,
         }
     },
-    "👨🏭": {
+    "👨‍🏭": {
         "name": "pyro",
         "starting_stats": {
             "max_health"   : 6,
@@ -216,7 +216,7 @@ CLASSES = {
             "initiative"   : 0,
         }
     },
-    "👨🌾": {
+    "👨‍🌾": {
         "name": "farmer",
         "starting_stats": {
             "max_health"   : 3,

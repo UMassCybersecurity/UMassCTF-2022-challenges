@@ -908,8 +908,8 @@ const GAME_STATE = {
     "character": null,
     "mode": "movement",
     "position": {
-        "x": 0,
-        "y": 0
+        "x": 8,
+        "y": 8
     },
     "inventory": {
         "selected": 0,

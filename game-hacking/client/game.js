@@ -315,6 +315,7 @@ const MENU_STATE = {
                 "enabled": false,
                 "action": (menuState) => {
                     menuState.currentMenuName = "new_character";
+                    renderMenu();
                 }
             },
             {
@@ -361,6 +362,7 @@ const MENU_STATE = {
                         alert("Passwords do not match.");
                         return;
                     }
+                    renderLoading();
                     const response = await queuePacket({
                         "type": "register",
                         "username": menuState.getInput("username"),
@@ -378,7 +380,6 @@ const MENU_STATE = {
                     menuState.updateLabel("account_info", "Logged in as: " + response.username);
                     menuState.enableId("account_info");
                     menuState.enableId("spacer");
-                    menuState.enableId("start");
                     menuState.enableId("create_character");
                     menuState.enableId("logout");
                     menuState.currentItem = 0;
@@ -412,6 +413,7 @@ const MENU_STATE = {
                 "label": "Submit",
                 "enabled": true,
                 "action": async function (menuState) {
+                    renderLoading();
                     const response = await queuePacket({
                         "type": "login",
                         "username": menuState.getInput("username"),
@@ -436,9 +438,9 @@ const MENU_STATE = {
                     if (response.character !== null) {
                         menuState.updateLabel("character_info", "Current character: " + response.character.name);
                         menuState.enableId("character_info");
+                        menuState.enableId("start");
                     }
                     menuState.enableId("spacer");
-                    menuState.enableId("start");
                     menuState.enableId("create_character");
                     menuState.enableId("logout");
                     menuState.currentItem = 0;
@@ -542,6 +544,7 @@ const MENU_STATE = {
                         !window.confirm("This will delete your current character. Are you sure?")) {
                         return;
                     }
+                    renderLoading();
                     const response = await queuePacket({
                         "type"     : "create_character",
                         "name"     : menuState.getInput("name"),
@@ -555,6 +558,7 @@ const MENU_STATE = {
                         alert("Failed to create character.")
                         return;
                     }
+                    console.log(response);
                     menuState.currentSession.character = response.character;
                     GAME_STATE.character = response.character;
                     menuState.currentMenuName = "main";
@@ -917,8 +921,8 @@ const GAME_STATE = {
 }
 
 function renderLoading() {
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // ctx.fillStyle = "#000000";
+    // ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#ffffff";
     ctx.font = '24px monospace';
     ctx.fillText("Loading...", 16, 16);
@@ -1197,6 +1201,7 @@ async function handleKeyDownInventoryMode(e) {
 
 async function handleKeyDownGame(e) {
     let response;
+    const loadScreenTimeoutId = setTimeout(renderLoading, 100);
     switch(GAME_STATE.mode) {
     case "movement":
         response = await handleKeyDownMovementMode(e);
@@ -1300,6 +1305,7 @@ async function handleKeyDownGame(e) {
             }
         }
     }
+    clearTimeout(loadScreenTimeoutId);
     renderViewport();
 }
 

@@ -231,7 +231,6 @@ def distance(a, b):
 
 
 def generate_grasslands(entities, world):
-    entity.Sign(0, 9, 9)
     while True:
         x = random.randint(1, 126)
         y = random.randint(1, 126)
@@ -239,9 +238,12 @@ def generate_grasslands(entities, world):
             continue
         if find_entity(entities, x, y) is not None:
             continue
+        if find_entity(entities, x, y + 1) is not None:
+            continue
         if distance((x, y), (4, 4)) <= 30:
             continue
         entities.append(entity.Portal(25, "desert", 4, 4, x, y))
+        entities.append(entity.Sign(2, x, y + 1))
         break
     while True:
         x = random.randint(1, 126)
@@ -250,9 +252,12 @@ def generate_grasslands(entities, world):
             continue
         if find_entity(entities, x, y) is not None:
             continue
+        if find_entity(entities, x, y + 1) is not None:
+            continue
         if distance((x, y), (4, 4)) <= 30:
             continue
         entities.append(entity.Portal(0, "maze1", 3, 3, x, y))
+        entities.append(entity.Sign(1, x, y + 1))
         break
     while True:
         x = random.randint(1, 126)
@@ -279,6 +284,76 @@ def generate_grasslands(entities, world):
         world[y][150] = Tile.WALL.value
         world[y][189] = Tile.WALL.value
 
+
+def generate_desert(entities, world):
+    while True:
+        x = random.randint(1, 126)
+        y = random.randint(1, 126)
+        if not natural_surface(world[y][x]):
+            continue
+        if find_entity(entities, x, y) is not None:
+            continue
+        if find_entity(entities, x, y + 1) is not None:
+            continue
+        if distance((x, y), (4, 4)) >= 30:
+            continue
+        entities.append(entity.Portal(0, "grasslands", 4, 4, x, y))
+        entities.append(entity.Sign(3, x, y + 1))
+        break
+    while True:
+        x = random.randint(1, 126)
+        y = random.randint(1, 126)
+        if not natural_surface(world[y][x]):
+            continue
+        if find_entity(entities, x, y) is not None:
+            continue
+        if find_entity(entities, x, y + 1) is not None:
+            continue
+        if distance((x, y), (4, 4)) <= 30:
+            continue
+        entities.append(entity.Portal(50, "snowland", 3, 3, x, y))
+        entities.append(entity.Sign(4, x, y + 1))
+        break
+
+
+def generate_bossfight(entities, world):
+    while True:
+        x = random.randint(1, 126)
+        y = random.randint(1, 126)
+        if not natural_surface(world[y][x]):
+            continue
+        if find_entity(entities, x, y) is not None:
+            continue
+        if find_entity(entities, x, y + 1) is not None:
+            continue
+        if distance((x, y), (4, 4)) >= 30:
+            continue
+        entities.append(entity.Portal(0, "grasslands", 4, 4, x, y))
+        entities.append(entity.Sign(5, x, y + 1))
+        break
+    while True:
+        x = random.randint(1, 126)
+        y = random.randint(1, 126)
+        if not natural_surface(world[y][x]):
+            continue
+        if find_entity(entities, x, y) is not None:
+            continue
+        if distance((x, y), (4, 4)) >= 20:
+            continue
+        entities.append(entities.append(entity.Sign(6, x, y)))
+        break
+    while True:
+        x = random.randint(1, 126)
+        y = random.randint(1, 126)
+        if not natural_surface(world[y][x]):
+            continue
+        if find_entity(entities, x, y) is not None:
+            continue
+        if find_entity(entities, x, y + 1) is not None:
+            continue
+        if distance((x, y), (4, 4)) <= 50:
+            continue
+        entities.append(entity.SantaClaus(x, y))
 
 def generate_signature(blob):
     m = hashlib.md5()
@@ -309,6 +384,7 @@ descriptions = {
         "building-wall": [Tile.SANDSTONE_WALL],
         "building-floor": [Tile.SANDSTONE],
         "decorations": "🌾🌴🌵",
+        "extra": generate_desert,
     },
     "snowland": {
         "bounding-wall": Tile.WALL,
@@ -316,6 +392,7 @@ descriptions = {
         "building-wall": [Tile.COBALT_WALL],
         "building-floor": [Tile.COBALT],
         "decorations": "❄🎄🌲",
+        "extra": generate_bossfight,
     },
 }
 

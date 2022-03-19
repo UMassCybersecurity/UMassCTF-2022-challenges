@@ -42,7 +42,14 @@ con.close()
 
 
 SIGN_MESSAGES = [
-    "Welcome to MapleQuest!"
+    "Welcome to MapleQuest!",
+    "Mike's Maze. Keep Out.",
+    "Beyond this hole is the desert. Be safe, traveler.",
+    "Welcome to the desert. This way back to the grasslands.",
+    "Beyond this hole is the snowland. No one has made it back alive",
+    "Welcome to the snowland. This way back to the desert.",
+    "Beware the claus...",
+    "You deserve a gift: UMASS{83H0LD_73h_S19nM4s73r}"
 ]
 
 

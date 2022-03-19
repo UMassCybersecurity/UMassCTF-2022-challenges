@@ -264,6 +264,7 @@ const MENU_STATE = {
                 "enabled": true,
                 "action": (menuState) => {
                     menuState.currentMenuName = "register";
+                    renderMenu();
                 }
             },
             {
@@ -273,6 +274,7 @@ const MENU_STATE = {
                 "enabled": true,
                 "action": (menuState) => {
                     menuState.currentMenuName = "login";
+                    renderMenu();
                 }
             },
             {
@@ -323,6 +325,20 @@ const MENU_STATE = {
                 "id": "logout",
                 "label": "Log Out",
                 "enabled": false,
+                "action": (menuState) => {
+                    menuState.currentSession = null;
+                    menuState.currentMenuName = "main";
+                    menuState.enableId("register");
+                    menuState.enableId("login");
+                    menuState.disableId("account_info");
+                    menuState.disableId("spacer");
+                    menuState.disableId("create_character");
+                    menuState.disableId("logout");
+                    menuState.disableId("character_info");
+                    menuState.disableId("start");
+                    menuState.currentItem = 0;
+                    renderMenu();
+                }
             }
         ],
         "register": [

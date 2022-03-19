@@ -19,7 +19,7 @@ def deserialize_entity(blob):
         "sign": Sign,
         "corpse": Corpse,
         "zombie": Zombie,
-        "magicmike": MagicMike,
+        "magicman": MagicMan,
         "woodlandmonster": WoodlandMonster,
         "madsun": MadSun,
         "volcano": Volcano,
@@ -474,7 +474,7 @@ class Zombie(Enemy):
         return base
 
 
-class MagicMike(Enemy):
+class MagicMan(Enemy):
     def __init__(self, x, y):
         super().__init__(x, y)
         self.attack_type = combat.MagicAttack
@@ -482,7 +482,7 @@ class MagicMike(Enemy):
         self.experience = 10
 
     def construct_empty():
-        return MagicMike(0, 0)
+        return MagicMan(0, 0)
 
     def serialize(self):
         base = super().serialize()
@@ -738,7 +738,7 @@ class CorrectHorseBatteryAward(Entity):
 
 
 world_associations = {
-    "grasslands": [Zombie, MagicMike, WoodlandMonster],
+    "grasslands": [Zombie, MagicMan, WoodlandMonster],
     "desert": [MadSun, Volcano, SentientStatue],
     "snowland": [Gman, Snowboi, Pingu],
 }

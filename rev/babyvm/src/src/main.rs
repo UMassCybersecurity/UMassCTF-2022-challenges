@@ -19,7 +19,7 @@ unsafe fn map_chunk() -> *mut std::ffi::c_void {
 fn main() {
     let ptr = unsafe { std::mem::transmute::<_, *mut u8>(map_chunk()) };
     let dest = unsafe { std::slice::from_raw_parts_mut(ptr, MAPSZ) };
-    dest.fill(0xc3d);
+    dest.fill(0xc3);
 
     let mut off = 0;
     let mut stk = Vec::new();

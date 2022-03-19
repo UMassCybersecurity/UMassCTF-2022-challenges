@@ -9,7 +9,7 @@ TRANS = {
     '[': b'\x06',
     ']': b'\x07',
 }
-with open('/home/jakob/challenge.bf') as code:
+with open('challenge.bf') as code:
     for c in code.read():
         sys.stdout.buffer.write(TRANS[c])
 sys.stdout.buffer.flush()

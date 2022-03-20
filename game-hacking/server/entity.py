@@ -334,7 +334,6 @@ class Enemy(Entity):
 
     def interact(self, game_state):
         self.health -= game_state.character.attack_value(self)
-        print("Debug: Dealing {}".format(game_state.character.attack_value(self)))
         base = [
             { "type": "message", "text": f"You hit the {self.type()}." }
         ]
@@ -458,7 +457,7 @@ class ThrowingEnemy(Enemy):
                     }
                 ]
             except Exception as e:
-                print(e)
+                print("Exception encountered, but dropped: {}".format(e))
                 return []
 
 

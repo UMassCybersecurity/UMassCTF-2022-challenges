@@ -486,7 +486,6 @@ class GameState(object):
                     self.find_mob(queued["id"]).lock = False
             else:
                 queued["tu"] -= time_step
-                print(time_step, queued["tu"], queued["tu"] - time_step)
         for event in events:
             if "tu" in event and event["tu"] > time_step:
                 event["tu"] -= time_step
@@ -799,12 +798,11 @@ class Connection(object):
             return { "error": "user already exists" }
 
         password_hash = hashlib.md5(password.encode()).digest()
-        print(password_hash)
         cur.execute('''INSERT INTO users (username, password) VALUES (?, ?)''', (username, password_hash))
         con.commit()
         self.user_id = cur.lastrowid
 
-        print("Successfully registered as {}".format(username))
+        print("[info]: {}: Successfully registered as {}".format(self.ip, username))
         self.logged_in = True
         self.username = username
         self.token = b64encode(secrets.token_bytes(16)).decode()
@@ -828,18 +826,17 @@ class Connection(object):
         if result is None:
             return { "error": "invalid password" }
         self.user_id = result[0]
-
-        print("Successfully logged in as {}".format(username))
+        print("[info]: {}: Successfully logged in as {}".format(self.ip, username))
         self.logged_in = True
         self.username = username
         if world is None:
             world = worldgen.generate_world()
-            print("Generated new world...")
+            print("[info]: {}: generated new world".format(self.ip))
         else:
             world = worldgen.validate(world)
             if world is None:
                 return { "error": "corrupted world data" }
-            print("Successfully loaded world!")
+            print("[info]: {}: successfully loaded world".format(self.ip))
         if self.character() is not None:
             self.game_state = GameState(Character.deserialize(self.character()), world)
         for i, session in enumerate(SESSIONS):
@@ -1036,7 +1033,7 @@ async def handle_connection(websocket):
                 if tmp is not None:
                     c = tmp
                 else:
-                    print("Invalid token")
+                    print("[info]: {}: sent invalid token".format(self.ip))
                 continue
 
             # Special handling for game saving.
@@ -1058,11 +1055,13 @@ async def handle_connection(websocket):
                 "error": "Invalid JSON"
             }))
         except websockets.exceptions.ConnectionClosedOK:
-            print("Received disconnect: {}".format(websocket.remote_address))
+            print("[info] {}: Received disconnect".format(websocket.remote_address))
             break
         except Exception as e:
+            print("[info] {}: Exception raised. Stack trace follows:".format(websocket.remote_address))
+            print(traceback.format_exc())
             await websocket.send(serialize({
-                "error": "Unhandled internal server error: {}".format(traceback.format_exc())
+                "error": "Unhandled internal server error."
             }))
 
 

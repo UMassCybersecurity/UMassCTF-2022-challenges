@@ -464,7 +464,7 @@ def validate(packet):
                 )
                 world["mobs"][obj["location"]] = [entity.deserialize_entity(x) for x in obj["mobs"]]
             except Exception as e:
-                print(e)
+                # print("Exception encountered, but ignored: {}".format(e))
                 pass
         return world
     except Exception as e:

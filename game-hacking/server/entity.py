@@ -348,7 +348,7 @@ class Enemy(Entity):
                     "replacement": Corpse(self.position["x"], self.position["y"])
                 }
             ]
-            if random.choice([1]) == 1:
+            if random.choice([1, 2]) == 1 and len(self.drop) > 0:
                 x, y = game_state.find_free_space(self.position["x"], self.position["y"])
                 item = random.choice(self.drop)
                 pickup = Pickup(item, x, y)
@@ -666,7 +666,7 @@ class SantaClaus(Enemy):
                     "replacement": Corpse(self.position["x"], self.position["y"])
                 }
             ]
-            if random.choice([1]) == 1:
+            if random.choice([1, 2]) == 1 and len(self.drop) > 0:
                 x, y = game_state.find_free_space(self.position["x"], self.position["y"])
                 item = random.choice(self.drop)()
                 pickup = Pickup(item, x, y)

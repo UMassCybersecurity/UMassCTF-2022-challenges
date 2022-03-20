@@ -69,9 +69,9 @@ def natural_surface(surf):
 def generate_maze(n):
     world = []
     entities = [entity.Portal(0, "grasslands", 5, 5, 1, 1)]
-    for y in range(127):
+    for y in range(128):
         world.append([])
-        for x in range(127):
+        for x in range(128):
             world[y].append(Tile.WALL.value)
     
     for y in range(127):
@@ -81,13 +81,13 @@ def generate_maze(n):
     
     def walls_of_point(x, y):
         walls = []
-        if x - 1 != 0:
+        if x - 1 > 0:
             walls.append(((x - 1, y), (x - 2, y)))
-        if x + 1 != 126:
+        if x + 1 < 126:
             walls.append(((x + 1, y), (x + 2, y)))
-        if y - 1 != 0:
+        if y - 1 > 0:
             walls.append(((x, y - 1), (x, y - 2)))
-        if y + 1 != 126:
+        if y + 1 < 126:
             walls.append(((x, y + 1), (x, y + 2)))
         return walls
     

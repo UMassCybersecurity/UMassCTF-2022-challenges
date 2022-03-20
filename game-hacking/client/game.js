@@ -922,15 +922,17 @@ const GAME_STATE = {
         const object = JSON.parse(window.localStorage.getItem('world')).blob;
         const blobs = splitBase64Chunks(urlDecodeBytes(object));
         for (let blob of blobs) {
-            let decoded = JSON.parse(atob(decoder.decode(new Uint8Array(blob))));
-            if (decoded["location"] !== name) {
-                continue;
-            }
-            this.tileMap = JSON.parse(decoder.decode(fflate.unzlibSync(base64ToBytes(decoded["tilemap"]))));
-            this.mobs = [];
-            for (let mob of decoded["mobs"]) {
-                this.mobs.push({ ...mob});
-            }
+            try {
+                let decoded = JSON.parse(atob(decoder.decode(new Uint8Array(blob))));
+                if (decoded["location"] !== name) {
+                    continue;
+                }
+                this.tileMap = JSON.parse(decoder.decode(fflate.unzlibSync(base64ToBytes(decoded["tilemap"]))));
+                this.mobs = [];
+                for (let mob of decoded["mobs"]) {
+                    this.mobs.push({ ...mob});
+                }
+            } catch {}
         }
         renderViewport();
     }

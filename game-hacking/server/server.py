@@ -608,7 +608,6 @@ class GameState(object):
         return find_free_space_recur(start_x, 1, start_y, 1)
 
     def find_item(self, id):
-        print(self.character.inventory)
         for i, item in enumerate(self.character.inventory):
             if item.id == id:
                 return i
@@ -869,6 +868,21 @@ class Connection(object):
             "world": worldgen.sign(world)
         }
 
+    def update_character(self):
+        if not self.logged_in:
+            return None
+        if self.game_state.character is None:
+            return None
+        con = sqlite3.connect('users.db')
+        cur = con.cursor()
+        cur.execute('''UPDATE users SET character = ? WHERE id = ?''',
+                    (json.dumps(self.game_state.character.serialize()), self.user_id))
+        con.commit()
+        return [{
+            "type": "message",
+            "text": "Successfully saved!"
+        }]
+
     def destroy_character(self):
         if not self.logged_in:
             return None
@@ -905,6 +919,7 @@ EXPECTED_FIELDS = {
     "unequip_item": ["id"],
     "consume_item": ["id"],
     "throw_item": ["id"],
+    "save_game": [],
 }
 
 
@@ -953,6 +968,8 @@ def handle_client_packet(message):
     elif packet_type == "throw_item" and validate_fields(message, "throw_item"):
         del message["type"]
         return lambda x: Connection.game_action(x, GameState.throw_item, message)
+    elif packet_type == "save_game" and validate_fields(message, "save_game"):
+        return lambda x: Connection.update_character(x)
     else:
         return lambda x: { "error": "Unknown packet." }
 
@@ -1015,6 +1032,10 @@ async def handle_connection(websocket):
                 else:
                     print("Invalid token")
                 continue
+
+            # Special handling for game saving.
+            if message.get("data").get("type") == "save_game":
+                await asyncio.sleep(2)
 
             message_id = message.get("id")
             thunk = handle_client_packet(message.get("data", {}))

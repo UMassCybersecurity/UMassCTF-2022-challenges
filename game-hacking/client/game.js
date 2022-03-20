@@ -1107,6 +1107,11 @@ async function handleKeyDownMovementMode(e) {
         GAME_STATE.mode = "inventory";
         GAME_STATE.inventory.selected = 0;
         break;
+    case "s":
+        response = await queuePacket({
+            "type": "save_game"
+        });
+        break;
     }
     return response;
 }

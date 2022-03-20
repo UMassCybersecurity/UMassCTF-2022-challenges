@@ -67,37 +67,68 @@ class Equippable(Item):
 class Umbrella(Equippable):
     def __init__(self, id=None):
         super().__init__(id)
-        self.strength = 1
-    
+        self.strength = 4
+        self.constitution = 1
+
     def icon(self):
         return "🌂"
 
 
 class Purse(Equippable):
+    def __init__(self, id=None):
+        super().__init__(id)
+        self.constitution = 3
+        self.max_health = 1
+
     def icon(self):
         return "👝"
 
 class Torch(Equippable):
+    def __init__(self, id=None):
+        super().__init__(id)
+        self.strength = 5
+
     def icon(self):
         return "🪔"
 
 class Axe(Equippable):
+    def __init__(self, id=None):
+        super().__init__(id)
+        self.strength = 5
+
     def icon(self):
         return "🪓"
 
 class Raygun(Equippable):
+    def __init__(self, id=None):
+        super().__init__(id)
+        self.strength = 3
+        self.intelligence = 3
+
     def icon(self):
         return "📡"
 
 class Bandaid(Consumable):
+    def __init__(self, id=None):
+        super().__init__(id)
+        self.health = 3
+
     def icon(self):
         return "🩹"
 
 class Fentanyl(Consumable):
+    def __init__(self, id=None):
+        super().__init__(id)
+        self.health = 5
+
     def icon(self):
         return "💊"
 
 class BudLite(Consumable):
+    def __init__(self, id=None):
+        super().__init__(id)
+        self.health = 2
+
     def icon(self):
         return "🍺"
 
@@ -112,7 +143,7 @@ class Banjo(Usable):
 class Aphrodisiac(Consumable):
     def icon(self):
         return "💋"
-    
+
 
 def deserialize(serialized):
     jump_table = {

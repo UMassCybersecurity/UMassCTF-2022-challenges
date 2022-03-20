@@ -590,6 +590,11 @@ class GameState(object):
     def pickup_all(self):
         ent = self.find_entity(self.position["x"], self.position["y"])
         if isinstance(ent, entity.Pickup):
+            if len(self.character.inventory) > 10:
+                self.deltas += [
+                    { "type": "message", "text": f"You have no room for the {ent.item.type()}!" },
+                ]
+                return
             self.character.inventory.append(ent.item)
             events = self.process_events([
                 { "type": "message", "text": f"You pick up the {ent.item.type()}" },

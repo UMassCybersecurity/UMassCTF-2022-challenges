@@ -1,2 +1,3 @@
 server/users.db
 server/__pycache__/
+solver/__pycache__/

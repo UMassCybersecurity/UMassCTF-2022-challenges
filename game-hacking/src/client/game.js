@@ -1384,37 +1384,3 @@ function renderGameOver() {
     ctx.fillText(GAME_OVER_MESSAGE, 0, 32);
     ctx.fillText("<Press any key to continue.>", 0, 64);
 }
-
-// --- TEMPORARY; DO NOT COMMIT TO VC
-// async function skipMenu() {
-//     let response = await queuePacket({
-//         "type": "register",
-//         "username": "Jakob",
-//         "password": "test",
-//     });
-//     console.log(response);
-//     GAME_STATE.character = response.character;
-//     TOKEN = response.token;
-//     response = await queuePacket({
-//         "type"     : "create_character",
-//         "name"     : "jakob",
-//         "age"      : 18,
-//         "class"    : "🤠 post malone",
-//         "order"    : "lawful",
-//         "morality" : "evil",
-//         "bonus"    : "🌂 umbrella (weapon)",
-//     });
-//     GAME_STATE.character = response.character;
-//     window.localStorage.setItem('world', JSON.stringify(response.world));
-//     TOKEN = response.token;
-
-//     GAME_STATE.loadWorld("grasslands");
-//     window.removeEventListener('load', renderMenu);
-//     document.removeEventListener('keydown', handleKeyDownMenu);
-//     window.addEventListener('load', renderViewport);
-//     document.addEventListener('keydown', handleKeyDownGame);
-//     canvas.addEventListener('click', handleMouseClickGame);
-//     renderViewport();
-// }
-// skipMenu();
-// ---

@@ -1,0 +1,2 @@
+websockets==10.2
+perlin_noise==1.12

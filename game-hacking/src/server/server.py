@@ -1037,7 +1037,7 @@ async def handle_connection(websocket):
                 continue
 
             # Special handling for game saving.
-            if message.get("data").get("type") == "save_game":
+            if message.get("data").get("type") in ["save_game", "login"]:
                 await asyncio.sleep(2)
 
             message_id = message.get("id")
@@ -1066,7 +1066,7 @@ async def handle_connection(websocket):
 
 
 async def main():
-    async with websockets.serve(handle_connection, "localhost", 8765):
+    async with websockets.serve(handle_connection, "0.0.0.0", 8765):
         await asyncio.Future()  # run forever
 
 

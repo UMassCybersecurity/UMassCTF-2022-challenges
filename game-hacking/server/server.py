@@ -381,6 +381,7 @@ class Character(object):
         self.equipped.append(item)
         for stat in ["max_health", "health", "strength", "constitution", "intelligence", "initiative"]:
             self.__setattr__(stat, self.__getattribute__(stat) + item.__getattribute__(stat))
+        self.health = min(self.health, self.max_health)
 
     def unequip_item(self, id):
         for i, item in enumerate(self.equipped):
@@ -392,6 +393,7 @@ class Character(object):
     def consume_item(self, item):
         for stat in ["max_health", "health", "strength", "constitution", "intelligence", "initiative"]:
             self.__setattr__(stat, self.__getattribute__(stat) + item.__getattribute__(stat))
+        self.health = min(self.health, self.max_health)
 
     def receive_projectile_damage(self, damage):
         self.health -= damage
@@ -415,9 +417,9 @@ class Character(object):
 
     def receive_experience(self, exp):
         self.experience += exp
-        if self.experience >= experience_for_level(self.level + 1):
+        while self.experience >= experience_for_level(self.level + 1):
+            self.experience -= experience_for_level(self.level + 1)
             self.level += 1
-            self.experience = 0
             self.max_health   += CLASSES[self.alliance_class]["leveling_stats"]["max_health"]
             self.strength     += CLASSES[self.alliance_class]["leveling_stats"]["strength"]
             self.constitution += CLASSES[self.alliance_class]["leveling_stats"]["constitution"]
@@ -576,7 +578,6 @@ class GameState(object):
                 self.received_island_flag = True
 
     def wait(self):
-        # pass
         self.deltas.append({
             "type": "update_world",
             "world": worldgen.sign(self.world)

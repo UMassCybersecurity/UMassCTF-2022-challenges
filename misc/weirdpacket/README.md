@@ -1,4 +1,4 @@
-# dumpsterdiving
+# weirdpacket
 
 Some kids asked if they could rummage through the e-waste bins.
 Something about a computer networking project that I didn't understand.

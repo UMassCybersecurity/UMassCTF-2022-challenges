@@ -1,9 +1,10 @@
 from urllib import response
 from flask import Flask, make_response, render_template, request
 from bot import bot
-from threading import Thread
+from threading import Thread,active_count
 
 app = Flask(__name__)
+
 
 def check_for_cookie():
     if(request.cookies.get("admin")):
@@ -29,15 +30,18 @@ def get_register():
             response.set_cookie("auth","-1",secure=True,samesite=None)
         return response
     elif(request.method=='POST'): 
-        data = request.form.to_dict()
-        thread = Thread(target=bot.checkEssay,kwargs={'data':data})
-        thread.start()
-        return "We got your request and will read it shortly!",200
+        if(active_count()<10):
+            data = request.form.to_dict()
+            thread = Thread(target=bot.checkEssay,kwargs={'data':data})
+            thread.start()
+            return "We got your request and will read it shortly!",200
+        else:
+            return "We are busy right now, try again in a second",200
 
 @app.route("/review/essay",methods = ['GET','POST'])
 def reviewEssay():
     essay = {"email":request.args.get("name"),"essay":request.args.get("essay")}
-    print(essay)
+    print(essay["essay"])
     response = make_response(render_template('essay_checker.html',essay=essay))
     add_resp_headers(response)
     if(request.remote_addr != '127.0.0.1'):

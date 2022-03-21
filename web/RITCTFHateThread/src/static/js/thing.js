@@ -1,9 +1,8 @@
-var ihaterit = document.getElementById("welcome").getAttribute("data-ihaterit");
+var iloveumass = document.getElementById("welcome").getAttribute("data-iloveumass");
 function say_something(words)
 {
-    console.log('alert('+words+')')
-    setTimeout('alert('+words+')',500)
+    setTimeout(`console.log('${words}')`,500)
 }
 document.addEventListener("DOMContentLoaded", function() {
-    say_something(ihaterit)
+    say_something(iloveumass)
 });

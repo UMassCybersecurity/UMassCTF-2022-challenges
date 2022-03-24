@@ -39,8 +39,6 @@ RUN apt-get update && apt-get install -y \
   libxpm4 \
   libsixel-bin \
   netcat \
-  && rm -rf /var/lib/apt/lists/*
-RUN apt-get update && apt-get install -y \
   xvfb \
   && rm -rf /var/lib/apt/lists/*
 COPY --from=0 /tmp/emacs/install/ /tmp/emacs/

@@ -1,3 +1,5 @@
+// Author: Jakob L. Kreuze <https://jakob.space>
+
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -100,7 +102,6 @@ emacs_value decode_sixel(emacs_env *ENV, ptrdiff_t
 							   *(palette + pixels[i] * 3 + 1),
 							   *(palette + pixels[i] * 3 + 2));
 		}
-		// sixel_allocator_free(allocator, pixels);
 
 		emacs_value ret = ENV->make_string(ENV, (char *) output, strlen(output));
 
@@ -146,7 +147,6 @@ emacs_value decode_sixel(emacs_env *ENV, ptrdiff_t
 		free(buf);
 		free(output);
 		sixel_allocator_free(allocator, palette);
-		// sixel_allocator_free(allocator, pixels);
 		return ret;
 
 }
@@ -163,7 +163,6 @@ int emacs_module_init(struct emacs_runtime *rt)
 		SIXELSTATUS status = SIXEL_FALSE;
 		status = sixel_allocator_new(&allocator, mymalloc, NULL, NULL, NULL);
 		if (SIXEL_FAILED(status)) {
-				/* panic(env, "Failed to create allocator."); */
 				return 1;
 		}
 
@@ -176,7 +175,6 @@ int emacs_module_init(struct emacs_runtime *rt)
 		emacs_value args[] = {symbol, func};
 		env->funcall(env, env->intern (env, "defalias"), 2, args);
 
-		// sizeof(struct emacs_value_tag) = 8
 
 		return 0;
 }

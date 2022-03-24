@@ -2,11 +2,12 @@
 
 set -e
 
-# {
-#   set -e
-#   sleep 60
-#   kill $$
-# } &
+# Kill the container after 30 seconds have elapsed.
+{
+  set -e
+  sleep 30
+  kill $$
+} &
 trap "pkill emacs" EXIT
 
 # Start the Emacs daemon.
@@ -23,8 +24,7 @@ emacsclient --eval "(load-file \"/root/sixmacs.el\")" >/dev/null 2>/dev/null
 # expect "t"
 
 # # Inject the flag.
-emacsclient --eval "(progn (set-buffer (generate-new-buffer \"*flag*\")) (insert \"FLAG_GOES_HERE\") (buffer-string))" >/dev/null 2>/dev/null
-# expect "\"FLAG_GOES_HERE\""
+emacsclient --eval "(progn (set-buffer (generate-new-buffer \"*flag*\")) (insert \"UMASS{n0T_4_DUnk_0n_3M4c2_By_4nY_M34n2.._n3Xt_Y34r_will_b3_n30V1M}\") (buffer-string))" >/dev/null 2>/dev/null
 
 # # Start the Rudel server, connect to it, and publish *scratch*.
 emacsclient --eval "(progn (find-file \"/root/.emacs.d/elpa/rudel-0.3.2/rudel-loaddefs.el\") (eval-buffer))" >/dev/null 2>/dev/null
@@ -35,6 +35,3 @@ emacsclient -c --eval "(progn (set-buffer \"*scratch*\") (advice-add 'rudel-upda
 
 # Tunnel to Rudel over stdin/stdout.
 nc localhost 6522
-
-# echo -e $(emacsclient --eval '(progn (set-buffer "*Messages*") (buffer-string))')
-# emacsclient --eval "(add-hook 'post-self-insert-hook #'(lambda () (message \"Test\")))"

@@ -1,3 +1,5 @@
+;; Author: Jakob L. Kreuze <https://jakob.space>
+
 (defvar sixplayground-overlays '())
 
 (defun sixplayground-make-overlay (start end data-or-function)
@@ -35,8 +37,3 @@
   (when (buffer-modified-p (get-buffer "*scratch*"))
     (sixplayground-parse)
     (set-buffer-modified-p nil)))
-
-;; (add-hook 'post-command-hook #'sixplayground-on-post-command)
-;; (progn (remove-hook 'post-command-hook #'sixplayground-on-post-command)
-;;        (dolist (overlay sixplayground-overlays)
-;;          (delete-overlay overlay)))

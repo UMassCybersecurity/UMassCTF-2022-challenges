@@ -1,4 +1,4 @@
-var iloveumass = document.getElementById("welcome").getAttribute("data-iloveumass");
+var iloveumass = document.getElementById("debug").getAttribute("data-iloveumass");
 function say_something(words)
 {
     setTimeout(`console.log('${words}')`,500)

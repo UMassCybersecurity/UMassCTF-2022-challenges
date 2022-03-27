@@ -5,6 +5,7 @@ from threading import Thread,active_count
 
 app = Flask(__name__)
 
+admin_cookie = 'VEgxJDFaTjBURDRGTDRHWUVUXzhEU0dGTlUwUkVIVU4yMzEyNFU5MQ=='
 
 def check_for_cookie():
     if(request.cookies.get("admin")):
@@ -53,6 +54,6 @@ def reviewEssay():
 
 @app.route("/join",methods = ['GET'])
 def get_play():
-    if(request.cookies.get("auth")=="VEgxJDFaTjBURDRGTDRHWUVUXzhEU0dGTlUwUkVIVU4yMzEyNFU5MQ=="):
+    if(request.cookies.get("auth")==admin_cookie):
         return "UMASS{N4MB3R_0N3_1N_$TUD3NT_D1N1NG_DVMA216537}",200
     return "You're not allowed here!",403

@@ -137,7 +137,7 @@ function base64ToBytes(str) {
 
 // ---
 var TOKEN = null;
-var socket = new WebSocket('ws://localhost:8765');
+var socket = new WebSocket(HOSTNAME);
 
 const SBOX = [
     0x63,0x7c,0x77,0x7b,0xf2,0x6b,0x6f,0xc5,0x30,0x01,0x67,0x2b,0xfe,0xd7,0xab,0x76,
@@ -574,7 +574,6 @@ const MENU_STATE = {
                         alert("Failed to create character.")
                         return;
                     }
-                    console.log(response);
                     menuState.currentSession.character = response.character;
                     GAME_STATE.character = response.character;
                     menuState.currentMenuName = "main";
@@ -1235,7 +1234,6 @@ async function handleKeyDownGame(e) {
     }
     if (response) {
         for (let update of response) {
-            console.log(update);
             switch (update.type) {
             case "update_position":
                 GAME_STATE.position.x = update.x;

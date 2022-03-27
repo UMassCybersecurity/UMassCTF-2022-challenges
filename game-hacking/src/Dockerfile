@@ -11,8 +11,6 @@ RUN pip install -r /root/server/requirements.txt
 COPY ./client /root/client
 WORKDIR /root/client
 RUN javascript-obfuscator game.js --rename-globals=true
-RUN mv game-obfuscated.js game.js
 COPY ./run.sh /root/run.sh
 RUN chmod +x /root/run.sh
 CMD /root/run.sh
-

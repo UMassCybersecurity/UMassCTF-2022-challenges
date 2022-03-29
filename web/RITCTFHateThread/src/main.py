@@ -3,9 +3,10 @@ from flask import Flask, make_response, render_template, request
 from bot import bot
 from threading import Thread,active_count
 
+admin_cookie = 'VEgxUzFTRDRTVVAzUlMzQ1IzVDRETTFOQzAwS0kzTDBMIQ'
+
 app = Flask(__name__)
 
-admin_cookie = 'VEgxJDFaTjBURDRGTDRHWUVUXzhEU0dGTlUwUkVIVU4yMzEyNFU5MQ=='
 
 def check_for_cookie():
     if(request.cookies.get("admin")):
@@ -14,6 +15,7 @@ def check_for_cookie():
 
 def add_resp_headers(response):
     response.headers['Content-Security-Policy']= "default-src 'self';script-src 'self' 'unsafe-eval'"
+
 @app.route("/",methods=['GET'])
 def get_main():
     response = make_response(render_template('index.html'))
@@ -42,7 +44,6 @@ def get_register():
 @app.route("/review/essay",methods = ['GET','POST'])
 def reviewEssay():
     essay = {"email":request.args.get("name"),"essay":request.args.get("essay")}
-    print(essay["essay"])
     response = make_response(render_template('essay_checker.html',essay=essay))
     add_resp_headers(response)
     if(request.remote_addr != '127.0.0.1'):
@@ -55,5 +56,5 @@ def reviewEssay():
 @app.route("/join",methods = ['GET'])
 def get_play():
     if(request.cookies.get("auth")==admin_cookie):
-        return "UMASS{N4MB3R_0N3_1N_$TUD3NT_D1N1NG_DVMA216537}",200
+        return "UMASS{NUMB3R_0N3_1N_$TUD3NT_D1N1NG_XD86543267!}",200
     return "You're not allowed here!",403

@@ -1,0 +1,1 @@
+Please include the tar file for download so users can run the challenge locally.

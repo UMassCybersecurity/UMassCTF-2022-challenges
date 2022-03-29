@@ -7,10 +7,6 @@ Location will be set to something obscure (prob African servers or something).
 
 Step 2.) Complete the Cert Cloud Quiz
 
-FORMULAS FOR POSSIBLE QUESTIONS HERE:
-
-PLACEHOLDER
-
-
+Answers for all questions can be seen in source code
 
 FLAG: UMASS{D0E$_UD3My_C0UNT?}

@@ -1,0 +1,1 @@
+I heard there are these weirdos who love UMASS dining a little bit too much. Can you infilitrate their secret society and get their super secret flag for me?

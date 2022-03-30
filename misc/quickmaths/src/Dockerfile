@@ -21,5 +21,5 @@ RUN chown -R root:root /home/ctf
 RUN chmod +x /home/ctf/ynetd
 
 USER ctf
-EXPOSE 8085
-CMD ./ynetd -p 8085 "python3 math.py"
+EXPOSE 1004
+CMD ./ynetd -p 1004 "python3 math.py"

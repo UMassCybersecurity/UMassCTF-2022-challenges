@@ -21,5 +21,5 @@ RUN chown -R root:root /home/ctf
 RUN chmod +x /home/ctf/ynetd
 
 USER ctf
-EXPOSE 8082
-CMD ./ynetd -p 8082 "python3 jeopardy.py"
+EXPOSE 1229
+CMD ./ynetd -p 1229 "python3 jeopardy.py"

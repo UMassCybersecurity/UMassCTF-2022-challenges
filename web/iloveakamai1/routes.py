@@ -1,34 +1,36 @@
-from flask import Blueprint, render_template, make_response, jsonify, redirect, url_for
-
+import hmac
+from click import option
+from flask import Flask, render_template,make_response,redirect,url_for,jsonify
 from flask_jwt_extended import create_access_token, set_access_cookies, get_jwt_identity, jwt_required
-
-foldername = 'q3'
-
-# Blueprint Configuration
-q3_bp = Blueprint(
-    'q3_bp', __name__,
-    url_prefix=f'/{foldername}',
-    template_folder='templates',
-    static_url_path="/static"
-)
+from flask_jwt_extended import JWTManager
 
 
-@q3_bp.route("/login", methods=["GET"])
+app = Flask(__name__)
+# Setup the Flask-JWT-Extended extension
+app.config["JWT_SECRET_KEY"] = "is-this-secret-enough" 
+app.config["JWT_TOKEN_LOCATION"]=['cookies']
+app.config["JWT_COOKIE_CSRF_PROTECT"] = False
+jwt = JWTManager(app)
+
+@app.route("/login", methods=["GET"])
 def login():
     username = 'anonymous'
     access_token = create_access_token(identity=username)
-    resp = jsonify({'login': True})
+    resp = make_response(render_template('login.html',username=username))
     set_access_cookies(resp, access_token)
     return resp, 200
 
-
-@q3_bp.route("/flag", methods=["GET"])
+@app.route("/35d8d35f35f867ad95bceb5f391bf5626ee218e23bbb7c6dc4022a7bc6e67b24/sign-hmac")
+def sign():
+    #hmac.new("is-this-secret-enough",)
+    return 'in dev'
+@app.route("/flag", methods=["GET"])
 @jwt_required(optional=True)
 def protected():
     current_identity = get_jwt_identity()
-
+    print(current_identity)
     if current_identity == 'admin':
-        indexmd = open(f"{bp_dir}/md/flag", "r").read()
+        indexmd = open(f"/md/flag", "r").read()
         resp = make_response(render_template('blank.html', data=indexmd))
         return resp, 200
     elif current_identity == 'anonymous':
@@ -36,21 +38,9 @@ def protected():
         resp = make_response(render_template('blank.html', data=data))
         return resp, 404
     else:
-        return redirect(url_for('q3_bp.login'))
+        return redirect('/login')
 
-
-@q3_bp.route('/', defaults={'u_path': 'index'})
-@q3_bp.route('/<path:u_path>')
+@app.route('/')
 @jwt_required(optional=True)
-def index(u_path):
-    current_identity = get_jwt_identity()
-    logger.info(current_identity)
-    if current_identity is not None:
-        try:
-            indexmd = open(f"{bp_dir}/md/{u_path}", "r").read()
-        except Exception as e:
-            return render_template('blank.html', data='oops page not found!!!')
-        resp = make_response(render_template('blank.html', data=indexmd))
-        return resp
-    else:
-        return redirect(url_for('q3_bp.login'))
+def index():
+    return 'in dev'

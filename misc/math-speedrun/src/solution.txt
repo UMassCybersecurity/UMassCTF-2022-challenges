@@ -1,4 +1,0 @@
-This can essentially be solved by scripting bash to make a socket to listen to the nc challenge, evaluating the math, and sending back the correct number.
-
-I do not have the time / knowledge to really make a good solution for this so I direct you to this much smarter person in stackoverflow:
-https://unix.stackexchange.com/questions/355216/getting-output-from-netcat-decoding-it-and-returning-an-output

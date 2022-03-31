@@ -21,5 +21,5 @@ RUN chown -R root:root /home/ctf
 RUN chmod +x /home/ctf/ynetd
 
 USER ctf
-EXPOSE 8083
-CMD ./ynetd -p 8083 "python3 ijele.py"
+EXPOSE 1227
+CMD ./ynetd -p 1227 "python3 ijele.py"

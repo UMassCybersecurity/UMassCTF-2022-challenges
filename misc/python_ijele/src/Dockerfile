@@ -22,4 +22,4 @@ RUN chmod +x /home/ctf/ynetd
 
 USER ctf
 EXPOSE 8083
-CMD ./ynetd -p 8083 "python3 ekrpat.py"
+CMD ./ynetd -p 8083 "python3 ijele.py"

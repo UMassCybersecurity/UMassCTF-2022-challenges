@@ -1,5 +1,5 @@
 def main():
-    print('wewe have aqhephukile benim bahasa codice. Unesi itu palabra sapi en Pelekania')
+    print('wewe have aqhephukile benim bahasa codice. Unesi la palabra sapi in Pelekania')
     code = input('>>> ')
     if code.lower() == 'cow':
         print('Break out of this simple python jail! You are not allowed to use the words eval, exec, import, open, os, read, system, or write.')

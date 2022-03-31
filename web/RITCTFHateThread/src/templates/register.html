@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="/static/styles/bootstrap.min.css">
+    <script id='debug' src="/static/js/thing.js" data-iloveumass="DOM content loaded for user"></script>
+    <title>UMASS DINING FAN CLUB</title>
+</head>
+<body>
+    <div class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="/">Home
+              </a>
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" href="register">Register</a>
+               <span class="visually-hidden">(current)</span>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="join">Join!</a>
+            </li>
+        </ul>
+    </div>
+
+    <h1>
+      UMASS Dining Fan Club Sumbissions 
+    </h1>
+    <div class="form-group"> 
+      <form action="/register" method="POST">
+        <label for="email" class="form-label mt-4">Email:</label><br>
+        <input type="text" id="email" name="email" class="form-control">
+        <label for="essay"class="form-label mt-4">Essay:</label><br>
+        <textarea class="form-control" id="essay" name="essay" rows="5"></textarea><br>
+        <input type="submit" value="Submit" class="btn btn-dark">
+      </form>
+    </div>
+</body>
+</html>

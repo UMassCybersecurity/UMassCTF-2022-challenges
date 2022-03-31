@@ -1,0 +1,3 @@
+Solve the trivia. Then type "jailbreak" and then "os.system('cat flag.txt')". Easy as that, you just need to be a top tier googler.
+
+UMASS{learning-something-new-is-fun}

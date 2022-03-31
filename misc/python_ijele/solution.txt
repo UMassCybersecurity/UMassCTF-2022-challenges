@@ -1,0 +1,3 @@
+Notes: Solve it by inputting the word "cow" and then breaking out of the python jail by concatenating strings to bypass the restrictions
+
+UMASS{congrats-now-you-are-multilingual}

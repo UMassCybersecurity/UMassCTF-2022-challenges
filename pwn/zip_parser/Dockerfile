@@ -1,20 +1,26 @@
-FROM ubuntu AS app
-RUN apt-get update && apt-get install -y patchelf && rm -rf /var/lib/apt/lists/*
+# sudo docker build -t zip_parser .
+# sudo docker run -d -p 7293:7293 --rm -it zip_parser
+
+FROM ubuntu:20.04
+
+RUN apt-get update
+
+RUN useradd -d /home/ctf/ -m -p ctf -s /bin/bash ctf
+RUN apt-get install patchelf -y
+RUN echo "ctf:ctf" | chpasswd
+
 WORKDIR /home/ctf
+
+COPY challenge/chal .
+COPY challenge/flag.txt .
+COPY challenge/ynetd .
 COPY challenge/ld-2.31.so .
 COPY challenge/libc.so.6 .
-COPY challenge/chal .
-COPY challenge/flag.txt . 
-RUN patchelf --set-interpreter ./ld-2.31.so --set-rpath ./ ./chal
+RUN patchelf --set-interpreter ./ld-2.31.so ./chal
+RUN patchelf --set-rpath ./ ./chal
 
+RUN chown -R root:root /home/ctf
 
-FROM redpwn/jail
-COPY --from=app / /srv
-COPY --from=app /home/ctf/flag.txt /srv/app/flag.txt
-COPY --from=app /home/ctf/chal /srv/app/run
-COPY --from=app /home/ctf/libc.so.6 /srv/app/libc.so.6
-COPY --from=app /home/ctf/ld-2.31.so /srv/app/ld-2.31.so
-
-ENV JAIL_TIME 120
-ENV JAIL_CONNS_PER_IP 1
-ENV JAIL_MEM 20M
+USER ctf
+EXPOSE 7293
+CMD ./ynetd -p 7293 ./chal

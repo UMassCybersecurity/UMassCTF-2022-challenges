@@ -219,7 +219,7 @@ function initializeSocket(socket, reconnect) {
         alert("Received disconnect from server. Reconnecting in 1s.");
         setTimeout(function() {
             alert("Attempting to reconnect...");
-            socket = new WebSocket('ws://localhost:8765');
+            socket = new WebSocket(HOSTNAME);
             initializeSocket(socket, true);
         }, 1000);
     });

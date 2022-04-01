@@ -33,7 +33,7 @@ def get_register():
             response.set_cookie("auth","-1",secure=True,samesite=None)
         return response
     elif(request.method=='POST'): 
-        if(active_count()<5):
+        if(active_count()<6):
             data = request.form.to_dict()
             thread = Thread(target=bot.checkEssay,kwargs={'data':data})
             thread.start()

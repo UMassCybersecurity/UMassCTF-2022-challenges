@@ -106,7 +106,7 @@ def main():
     d4 = {'chars': [']'], 'points': 400, 'question': 'As of 2020, you could not represent this value as an integer in any coding language', 'answer': ['inf', 'infinity', 'negative infinity'], 'answered': False}
     d5 = {'chars': ['m', 'n', 'o'], 'points': 500, 'question': 'What was the mathematical nickname given to the first computer programmers mother by said programmers father?', 'answer': ['princess of parallelograms', 'the princess of parallelograms'], 'answered': False}
 
-    e1 = {'chars': ['`'], 'points': 100, 'question': 'You can only win prizes in this CTF if you are a _______', 'answer': ['student', 'university student', 'in college', 'students'], 'answered': False}
+    e1 = {'chars': ['`'], 'points': 100, 'question': 'What color is the sky?', 'answer': ['blue', 'red', 'yellow', 'white', 'gray'], 'answered': False}
     e2 = {'chars': ['r'], 'points': 200, 'question': 'Name a sponsor of this CTF', 'answer': ['gcp', 'google cloud', 'akamai', 'htb', 'hackthebox', 'offensive security', 'offensivesecurity', 'cics', 'umass amherst cics', 'mcics', 'umass', 'umass amherst', 'umass cics', 'umass mcics', 'atc', 'american tower', 'american tower corporation', 'tryhackme', 'thm'], 'answered': False}
     e3 = {'chars': ['h'], 'points': 300, 'question': 'What three word phrase would the newest host of Jeopardy, Ken Jennings, say at the end of the show during his first few months of hosting?', 'answer': ['thank you alex'], 'answered': False}
     e4 = {'chars': [',', '~'], 'points': 400, 'question': 'What year was UMassCTF first hosted?', 'answer': ['2020'], 'answered': False}

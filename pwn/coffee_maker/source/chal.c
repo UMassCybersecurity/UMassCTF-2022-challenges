@@ -10,6 +10,12 @@
 
 #define MAGIC 0x1337
 
+__attribute__((constructor)) void ignore_me() {
+    setbuf(stdin, NULL);
+    setbuf(stdout, NULL);
+    setbuf(stderr, NULL);
+}
+
 struct P1Header {
     unsigned int magic;
     unsigned int action;

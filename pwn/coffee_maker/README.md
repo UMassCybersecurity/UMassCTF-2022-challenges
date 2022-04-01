@@ -8,7 +8,7 @@ Description: Our coworker just bought an iot coffee machine that lets him start 
              it probably doesn't even have stack protectors or pie.
 
              According to the manufacturers website the md5sum of the original firmware is:
-             dcf0aae43833578535aca4055624605d
+		4f3b072e43086f1253f90f7fc366cfb2
 
 For admins:
 	to start challenge, setup docker using commands commented at top of Dockerfile. Distribute files in `static` to user

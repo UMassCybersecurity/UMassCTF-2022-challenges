@@ -13,4 +13,8 @@ WORKDIR /root/client
 RUN javascript-obfuscator game.js --rename-globals=true
 COPY ./run.sh /root/run.sh
 RUN chmod +x /root/run.sh
+
+EXPOSE 8123
+EXPOSE 8124
+
 CMD /root/run.sh

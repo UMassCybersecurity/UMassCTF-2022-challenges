@@ -1066,7 +1066,7 @@ async def handle_connection(websocket):
 
 
 async def main():
-    async with websockets.serve(handle_connection, "0.0.0.0", 8765):
+    async with websockets.serve(handle_connection, "0.0.0.0", 8124):
         await asyncio.Future()  # run forever
 
 

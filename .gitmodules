@@ -1,0 +1,3 @@
+[submodule "emacs"]
+	path = pwn/ret2emacs/src/stage0/emacs
+	url = git://git.sv.gnu.org/emacs.git

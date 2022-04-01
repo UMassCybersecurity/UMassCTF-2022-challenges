@@ -1,5 +1,3 @@
-import ctypes  # An included library with Python install.
-
 #import everything from tkinter
 from tkinter import *
 
@@ -28,31 +26,6 @@ def slowprint(s):
 # Create a GUI Window
 
 
-def Mbox():
-    random.seed(datetime.now())
-    temp = tk.Tk()
-    temp.title("Reason #5 you're a failure")
-    width = temp.winfo_screenwidth()
-    height = temp.winfo_screenheight()
-    temp.geometry("300x150+0+49")
-    lines = open("insults.txt").read().splitlines()
-    ttk.Label(temp, text = random.choice(lines), wraplength=250, justify="center").pack()
-    ttk.Button(temp, text = " OK ", command = temp.destroy).pack(side=tk.BOTTOM)
-  
-    for i in range(100):
-        width_pos = random.randint(0,width) - 100
-        height_pos = random.randint(0,height) - 100
-        x = tk.Toplevel()
-        x.title("Reason #" + str(i) + " you're a failure")
-        x.geometry("300x150+" + str(width_pos) + "+" + str(height_pos))
-        x.resizable(False, False)
-        lines = open("insults.txt").read().splitlines()
-        ttk.Label(x, text = random.choice(lines), wraplength=250, justify="center").pack()
-        ttk.Button(x, text = " OK ", command = x.destroy).pack(side=tk.BOTTOM)
-    
-    temp.mainloop()
-
-
 # END OF THE PROGRAM
 print("""   _                   _
  _( )                 ( )_
@@ -67,7 +40,7 @@ print("""   _                   _
     _,/'/'  ^^^  '\'\\,_
    (_, |           | ,_)
      (_)           (_)""")
-slowprint("Welcome to our totally legit AWS Certification Practice Exam. If multiple answers are expected, type them together with no spaces in alphabetical order. Now let's get to some practicing. Good luck!")
+slowprint("Welcome to our totally legit AWS Certification Practice Exam. If multiple answers are expected, type them together with no spaces in alphabetical order (For example 'ac' if you thought choices a and c were the answer). Answers are not case sensitive. Now let's get to some practicing. Good luck!")
 temp = {
     "I am testing my application and deploys it to AWS Lambda. To remain under the package size limit, the dependencies were not included in the deployment file. When testing the application through the console, the function won't work due to a missing dependencies issue.":
       ["Use the console to manually update the dependencies",
@@ -75,7 +48,7 @@ temp = {
       "Attach a layer with the missing dependencies",
       "Request a package size limit increase and include the dependencies in the package.",
       "c"],
-    "What are the steps to using the AWS CLI to launch a templatized serverless application":
+    "What are the steps to using the AWS Command Line Interface to launch a serverless application through a premade template?":
       ["Use AWS CloudFormation get-template then CloudFormation execute-change-set",
       "Use AWS CloudFormation package then CloudFormation deploy",
       "Use AWS CloudFormation validate-template then CloudFormation create-change-set",
@@ -87,13 +60,13 @@ temp = {
       "IAM with SAML integration",
       "Amazon Directory Service",
       "a"],
-    "An application currently uses multiple lambdas invoking one another as a large state machine? How could this application be simplified and managed more effectively":
+    "An application currently uses multiple lambdas invoking one another in succession? How could this application be simplified and managed more effectively?":
     ["Combine all lambda functions into one large lambda",
     "Utilize Step Functions",
     "Amazon Elastic MapReduce",
     "Move the codebase out of lambda to an EC2 instance",
     "b"],
-    "A developer is asked to implement caching in front of Amazon RDS. Which implementation below would work while maintaining maximum uptime and minimal costs?":
+    "I want to develop a cache in front of my Amazon Relational Database System. Which implementation below would work while minimizing downtime and costs?":
     ["Install Redis on an Amazon EC2 Instance",
     "Implement Amazon ElastiCache Memcached",
     "Migrate the database to Amazon Redshift",
@@ -106,12 +79,12 @@ temp = {
     "Integrate Amazon CloudFront with S3",
     "bd"],
     "My friend needs temporary access to some resources on my other account. What is the most secure way I could achieve this?":
-    ["Create a cross-account access role, and use sts:AssumeRole API"
+    ["Create a cross-account access role, and use sts:AssumeRole API",
     "Add an SSH key for another IAM user",
     "Create a user pool through Amazon Cognito",
     "Create a dedicated IAM access key and dm your friend it",
     "a"],
-    "An application periodically reads data from an Amazon DynamoDB table. Every so often the applications crashes. Looking through the logs the error reads: 'ProvisionedThroughputExceeded'. How can this be fixed?":
+    "My application periodically reads data from an Amazon DynamoDB table. Every so often the applications crashes. Looking through the logs the error reads: 'ProvisionedThroughputExceeded'. How can this be fixed?":
     ["Create a new global secondary index for the table to help with the additional requests",
     "Try sending the request again",
     "Try the failed read requests with exponential backoff",
@@ -143,10 +116,10 @@ temp = {
     "d"],
     "I'm attempting to create a CTF Challenge on AWS and have enabled auto scaling to support the needs of my competitors. I am worried that someone may exploit my infrastructure and attempt to crash it or worse (I'm broke) run me up hundred's of dollers in bills. What are my options to prevent this? (Choose all that apply)":
 		["Utilize AWS Cloudwatch to alert me when my spending goes over my budget",
-		"Cancel the competition",
+		"Limit the number of competitors accessing my site at a time",
 		"Set a capacity on the Auto Scaling group",
 		"Create IAM credentials for each individual and cancel those who excessively utilize the infrastructure",
-		"ac"],
+		"abc"],
 		"Your IT Security department has mandated that all the traffic flowing in and out of EC2 instances needs to be monitored for potential malicious activity. The EC2 instances are launched in their own VPC. Which services would you use to achieve this?":
 		["VPC Flow Logs",
 		"Cloudwatch Metrics",
@@ -158,16 +131,42 @@ temp = {
 		"Look at the Cloudtrail logs and parse for when to restart",
 		"Create a CloudWatch metric which looks into the instance threshold, and assign this metric against an alarm to reboot the instance",
 		"Use the AWS Config utility on the EC2 Instance to check for metrics and restart the server",
-		"b"],
+		"c"],
 		"What is the maximum batch size supported by AWS SQS for ReceiveMessage call as an event sources for AWS Lambda?":
-		["20","40","100","10","d"]
+		["20","40","100","10","d"],
+    "In an AWS CloudFormation template, what section of the root must be included to incorporate objects specified by the AWS SAM in addition to resources?":
+    ["Globals","Conditions","Properties","Transform","d"],
+    "When using Amazon Lex, bots can be directly or indirectly deployed to which of the following? (Choose all that apply)":
+    ["Slack", "A Web App", "Twilio", "Microsoft Teams", "abcd"],
+    "Which of the following are compute purchasing options? (Choose all that apply)":
+    ["Dedicated","Reduced","Spot", "Savings Plans", "acd"],
+    "I wanna create an S3 bucket with public read-only objects. How can I do this?":
+    ["Set permission on upload",
+    "Update the bucket policy",
+    "Use IAM Roles",
+    "S3 objects by default so no action is needed", "b"],
+    "Which of the following services would be best for transfering data across the country to various S3 buckets? (Choose all that apply)":
+    ["Amazon Cloudfront",
+    "Amazon Glacier",
+    "Amazon Snowball",
+    "Amazon Transfer Acceleration", 'cd'],
+    "How far do EBS Volumes go out?":
+    ["Virtual Private Cloud",
+    "AWS Region",
+    "Avaliablity Zone",
+    "Placement Group",
+    "c"],
+    "How far do EC2 security groups reach out?":
+    ["Placement Group",
+    "VPC",
+    "Avaliability Zone",
+    "Region", "d"],
   }
 t_key = list(temp.keys())
-print(len(t_key))
 random.seed(str(datetime.now()))
 random.shuffle(t_key)
 i = 1
-for key in t_key[:5]:
+for key in t_key[:8]:
   slowprint(" ")
   slowprint(str(i) +".) " + str(key))
   slowprint(" ")
@@ -179,7 +178,6 @@ for key in t_key[:5]:
   answer = temp[key][4]
   user_answer = input("What is your answer? ")
   if answer != user_answer.lower():
-    Mbox()
     exit()
   i += 1
   print(" ")
@@ -188,27 +186,25 @@ for key in t_key[:5]:
 slowprint("")
 slowprint("You didn't think you could just get away with multiple choice questions did you? Every good cloud engineer should know some networking. Let's get to it! :)")
 slowprint("")
-slowprint(str(i) + ".) Suppose that TCP's current estimated values for the round trip time (estimatedRTT) and deviation in the RTT (DevRTT) are 260 msec and 12 msec, respectively (see Section 3.5.3 for a discussion of these variables). Suppose that the next three measured values of the RTT are 240 msec, 320 msec, and 240 msec respectively. What is the estimatedRTT after the third RTT?")
+slowprint(str(i) + ".) Suppose we are running TCP between two hosts. Each packet has an estimated round trip time of 260ms. The current deviation between each packet's round trip time is 12 msec. Looking at the round trip time of the next three packets, we get values of 240, 320, and 240 ms each. Calculate the estimated round trip time after the third packet.")
 slowprint("")
 i+=1
 user_answer = input("What is your answer? ")
 if float(user_answer) != float(262.15):
-	Mbox()
 	exit()
 slowprint("CORRECT!")
 slowprint(" ")
-slowprint(str(i) + ".) What is the subnet mask for a network designed to have 1,164,375 hosts?")
+slowprint(str(i) + ".) What is the subnet mask for a network designed to have 1,164,375 hosts? (Please input in format NUMBER.NUMBER.NUMBER.NUMBER")
 slowprint("")
 user_answer = input("What is your answer? ")
 if user_answer != "255.244.0.0":
-	Mbox()
 	exit()
 slowprint(" ")
 slowprint("CORRECT!")
 i+=1
 slowprint(" ")
 slowprint(str(i) + ".) Design a VLSM Network with an ip of 10.0.0.0 designed for 11 hosts. Please give each respective subnet ip in sequential order separated by a comma. Assume that connections are unstable and that you are using IPV10 for your protocols.")
-time.sleep(10)
+time.sleep(15)
 slowprint("Just kidding :)")
-slowprint("I guess you deserve this for escaping my Cert Hell...")
+slowprint("I guess you deserve this for escaping my Cert Conundrum...")
 slowprint("UMASS{D0E$_UD3My_C0UNT?}")

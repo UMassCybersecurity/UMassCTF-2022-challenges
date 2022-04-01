@@ -1,12 +1,3 @@
-Quiz Answers are random but formulas will be below.
-
-Step 1.) Find the AMI
-
-Users will first have to learn how to launch an EC2-Instance using the AMI I hid on Amazon Catalog.
-Location will be set to something obscure (prob African servers or something).
-
-Step 2.) Complete the Cert Cloud Quiz
-
 Answers for all questions can be seen in source code
 
 FLAG: UMASS{D0E$_UD3My_C0UNT?}

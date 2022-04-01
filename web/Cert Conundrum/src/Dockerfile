@@ -14,12 +14,12 @@ RUN echo "ctf:ctf" | chpasswd
 
 WORKDIR /home/ctf
 
-COPY ./app .
+COPY . .
 COPY ynetd .
 
 RUN chown -R root:root /home/ctf
 RUN chmod +x /home/ctf/ynetd
 
 USER ctf
-EXPOSE 8082
-CMD ./ynetd -p 8082 "python3 jeopardy.py"
+EXPOSE 3740
+CMD ./ynetd -p 3740 "python3 cert_conundrum.py"

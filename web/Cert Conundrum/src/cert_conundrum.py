@@ -1,11 +1,11 @@
 #import everything from tkinter
-from tkinter import *
+#from tkinter import *
 
 
 # and import messagebox as mb from tkinter
-from tkinter import messagebox as mb
-import tkinter as tk
-from tkinter import ttk
+#from tkinter import messagebox as mb
+#import tkinter as tk
+#from tkinter import ttk
 
 #for setting random seed
 from datetime import datetime
@@ -18,7 +18,7 @@ def slowprint(s):
 	for c in s + '\n':
 		sys.stdout.write(c)
 		sys.stdout.flush()
-		time.sleep(0.005)
+		time.sleep(0.01)
     
 
 
@@ -144,7 +144,7 @@ temp = {
     ["Set permission on upload",
     "Update the bucket policy",
     "Use IAM Roles",
-    "S3 objects by default so no action is needed", "b"],
+    "S3 objects by default are public read-only so no action is needed", "b"],
     "Which of the following services would be best for transfering data across the country to various S3 buckets? (Choose all that apply)":
     ["Amazon Cloudfront",
     "Amazon Glacier",
@@ -192,6 +192,7 @@ i+=1
 user_answer = input("What is your answer? ")
 if float(user_answer) != float(262.15):
 	exit()
+slowprint(" ")
 slowprint("CORRECT!")
 slowprint(" ")
 slowprint(str(i) + ".) What is the subnet mask for a network designed to have 1,164,375 hosts? (Please input in format NUMBER.NUMBER.NUMBER.NUMBER")
@@ -204,7 +205,7 @@ slowprint("CORRECT!")
 i+=1
 slowprint(" ")
 slowprint(str(i) + ".) Design a VLSM Network with an ip of 10.0.0.0 designed for 11 hosts. Please give each respective subnet ip in sequential order separated by a comma. Assume that connections are unstable and that you are using IPV10 for your protocols.")
-time.sleep(15)
+time.sleep(30)
 slowprint("Just kidding :)")
 slowprint("I guess you deserve this for escaping my Cert Conundrum...")
 slowprint("UMASS{D0E$_UD3My_C0UNT?}")

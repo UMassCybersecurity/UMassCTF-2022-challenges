@@ -1,0 +1,109 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_EXCMD	mixed	/number, pattern, mixed, or combineV2/
+!_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
+!_TAG_PROC_CWD	/home/seal/github/private/challs/optimal_vm/source/optimal_vm/	//
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	5.9.0	/4492555f/
+0	target/debug/.fingerprint/byteorder-56460b1d02bae5d5/lib-byteorder.json	/^{"rustc":14330414595928666026,"features":"[\\"default\\", \\"std\\"]","target":60497978394477245/;"	o	array:local
+0	target/debug/.fingerprint/optimal_vm-50c19bc3ef38372b/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	o	array:local
+0	target/debug/.fingerprint/optimal_vm-d2b3de31fd9433bd/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	a	array:deps
+0	target/debug/.fingerprint/optimal_vm-d2b3de31fd9433bd/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	n	array:deps.0
+0	target/debug/.fingerprint/optimal_vm-d2b3de31fd9433bd/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	o	array:local
+1	target/debug/.fingerprint/optimal_vm-d2b3de31fd9433bd/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	s	array:deps.0
+17598535894874457435	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	o	object:outputs
+2	target/debug/.fingerprint/optimal_vm-d2b3de31fd9433bd/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	b	array:deps.0
+2797684049618456168	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	o	object:outputs
+3	target/debug/.fingerprint/optimal_vm-d2b3de31fd9433bd/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	n	array:deps.0
+5309432699494263626	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	o	object:outputs
+931469667778813386	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	o	object:outputs
+Add	src/main.rs	/^    Add,$/;"	e	enum:Op
+Be	src/main.rs	/^    Be,$/;"	e	enum:Op
+CheckDepInfo	target/debug/.fingerprint/byteorder-56460b1d02bae5d5/lib-byteorder.json	/^{"rustc":14330414595928666026,"features":"[\\"default\\", \\"std\\"]","target":60497978394477245/;"	o	object:local.0
+CheckDepInfo	target/debug/.fingerprint/optimal_vm-50c19bc3ef38372b/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	o	object:local.0
+CheckDepInfo	target/debug/.fingerprint/optimal_vm-d2b3de31fd9433bd/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	o	object:local.0
+IsTrue	src/main.rs	/^    IsTrue,$/;"	e	enum:Op
+Jmp	src/main.rs	/^    Jmp,$/;"	e	enum:Op
+Ll	src/main.rs	/^    Ll,$/;"	e	enum:Op
+LoadArr	assembler.py	/^def LoadArr(x, y):$/;"	f
+LoadArr	src/main.rs	/^    LoadArr,$/;"	e	enum:Op
+Mov	src/main.rs	/^    Mov,$/;"	e	enum:Op
+Next	src/main.rs	/^    Next,$/;"	e	enum:Op
+Op	src/main.rs	/^enum Op {$/;"	g
+Print	src/main.rs	/^    Print,$/;"	e	enum:Op
+Toggle	src/main.rs	/^    Toggle,$/;"	e	enum:Op
+add	assembler.py	/^def add(x, y):$/;"	f
+be	assembler.py	/^def be(x, y, z):$/;"	f
+code	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	n	object:outputs.17598535894874457435
+code	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	n	object:outputs.2797684049618456168
+code	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	n	object:outputs.5309432699494263626
+code	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	n	object:outputs.931469667778813386
+compile_kind	target/debug/.fingerprint/byteorder-56460b1d02bae5d5/lib-byteorder.json	/^{"rustc":14330414595928666026,"features":"[\\"default\\", \\"std\\"]","target":60497978394477245/;"	n
+compile_kind	target/debug/.fingerprint/optimal_vm-50c19bc3ef38372b/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	n
+compile_kind	target/debug/.fingerprint/optimal_vm-d2b3de31fd9433bd/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	n
+config	target/debug/.fingerprint/byteorder-56460b1d02bae5d5/lib-byteorder.json	/^{"rustc":14330414595928666026,"features":"[\\"default\\", \\"std\\"]","target":60497978394477245/;"	n
+config	target/debug/.fingerprint/optimal_vm-50c19bc3ef38372b/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	n
+config	target/debug/.fingerprint/optimal_vm-d2b3de31fd9433bd/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	n
+convert_op	src/main.rs	/^fn convert_op(opcode: u8) -> Op {$/;"	f
+dep_info	target/debug/.fingerprint/byteorder-56460b1d02bae5d5/lib-byteorder.json	/^{"rustc":14330414595928666026,"features":"[\\"default\\", \\"std\\"]","target":60497978394477245/;"	s	object:local.0.CheckDepInfo
+dep_info	target/debug/.fingerprint/optimal_vm-50c19bc3ef38372b/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	s	object:local.0.CheckDepInfo
+dep_info	target/debug/.fingerprint/optimal_vm-d2b3de31fd9433bd/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	s	object:local.0.CheckDepInfo
+deps	target/debug/.fingerprint/byteorder-56460b1d02bae5d5/lib-byteorder.json	/^{"rustc":14330414595928666026,"features":"[\\"default\\", \\"std\\"]","target":60497978394477245/;"	a
+deps	target/debug/.fingerprint/optimal_vm-50c19bc3ef38372b/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	a
+deps	target/debug/.fingerprint/optimal_vm-d2b3de31fd9433bd/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	a
+fd	assembler.py	/^fd = open("bin", "wb")$/;"	v
+features	target/debug/.fingerprint/byteorder-56460b1d02bae5d5/lib-byteorder.json	/^{"rustc":14330414595928666026,"features":"[\\"default\\", \\"std\\"]","target":60497978394477245/;"	s
+features	target/debug/.fingerprint/optimal_vm-50c19bc3ef38372b/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	s
+features	target/debug/.fingerprint/optimal_vm-d2b3de31fd9433bd/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	s
+go_next	assembler.py	/^def go_next(x):$/;"	f
+is_true	assembler.py	/^def is_true(x, y):$/;"	f
+jmp	assembler.py	/^def jmp(x):$/;"	f
+ll	assembler.py	/^def ll(x, y):$/;"	f
+local	target/debug/.fingerprint/byteorder-56460b1d02bae5d5/lib-byteorder.json	/^{"rustc":14330414595928666026,"features":"[\\"default\\", \\"std\\"]","target":60497978394477245/;"	a
+local	target/debug/.fingerprint/optimal_vm-50c19bc3ef38372b/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	a
+local	target/debug/.fingerprint/optimal_vm-d2b3de31fd9433bd/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	a
+main	src/main.rs	/^fn main() {$/;"	f
+metadata	target/debug/.fingerprint/byteorder-56460b1d02bae5d5/lib-byteorder.json	/^{"rustc":14330414595928666026,"features":"[\\"default\\", \\"std\\"]","target":60497978394477245/;"	n
+metadata	target/debug/.fingerprint/optimal_vm-50c19bc3ef38372b/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	n
+metadata	target/debug/.fingerprint/optimal_vm-d2b3de31fd9433bd/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	n
+mov	assembler.py	/^def mov(x, y):$/;"	f
+outputs	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	o
+path	target/debug/.fingerprint/byteorder-56460b1d02bae5d5/lib-byteorder.json	/^{"rustc":14330414595928666026,"features":"[\\"default\\", \\"std\\"]","target":60497978394477245/;"	n
+path	target/debug/.fingerprint/optimal_vm-50c19bc3ef38372b/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	n
+path	target/debug/.fingerprint/optimal_vm-d2b3de31fd9433bd/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	n
+profile	target/debug/.fingerprint/byteorder-56460b1d02bae5d5/lib-byteorder.json	/^{"rustc":14330414595928666026,"features":"[\\"default\\", \\"std\\"]","target":60497978394477245/;"	n
+profile	target/debug/.fingerprint/optimal_vm-50c19bc3ef38372b/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	n
+profile	target/debug/.fingerprint/optimal_vm-d2b3de31fd9433bd/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	n
+rustc	target/debug/.fingerprint/byteorder-56460b1d02bae5d5/lib-byteorder.json	/^{"rustc":14330414595928666026,"features":"[\\"default\\", \\"std\\"]","target":60497978394477245/;"	n
+rustc	target/debug/.fingerprint/optimal_vm-50c19bc3ef38372b/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	n
+rustc	target/debug/.fingerprint/optimal_vm-d2b3de31fd9433bd/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	n
+rustc_fingerprint	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	n
+rustflags	target/debug/.fingerprint/byteorder-56460b1d02bae5d5/lib-byteorder.json	/^{"rustc":14330414595928666026,"features":"[\\"default\\", \\"std\\"]","target":60497978394477245/;"	a
+rustflags	target/debug/.fingerprint/optimal_vm-50c19bc3ef38372b/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	a
+rustflags	target/debug/.fingerprint/optimal_vm-d2b3de31fd9433bd/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	a
+show	assembler.py	/^def show(x):$/;"	f
+status	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	s	object:outputs.17598535894874457435
+status	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	s	object:outputs.2797684049618456168
+status	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	s	object:outputs.5309432699494263626
+status	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	s	object:outputs.931469667778813386
+stderr	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	s	object:outputs.17598535894874457435
+stderr	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	s	object:outputs.2797684049618456168
+stderr	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	s	object:outputs.5309432699494263626
+stderr	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	s	object:outputs.931469667778813386
+stdout	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	s	object:outputs.17598535894874457435
+stdout	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	s	object:outputs.2797684049618456168
+stdout	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	s	object:outputs.5309432699494263626
+stdout	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	s	object:outputs.931469667778813386
+success	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	b	object:outputs.17598535894874457435
+success	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	b	object:outputs.2797684049618456168
+success	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	b	object:outputs.5309432699494263626
+success	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	b	object:outputs.931469667778813386
+successes	target/.rustc_info.json	/^{"rustc_fingerprint":8977117353482886992,"outputs":{"17598535894874457435":{"success":true,"stat/;"	o
+target	target/debug/.fingerprint/byteorder-56460b1d02bae5d5/lib-byteorder.json	/^{"rustc":14330414595928666026,"features":"[\\"default\\", \\"std\\"]","target":60497978394477245/;"	n
+target	target/debug/.fingerprint/optimal_vm-50c19bc3ef38372b/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	n
+target	target/debug/.fingerprint/optimal_vm-d2b3de31fd9433bd/bin-optimal_vm.json	/^{"rustc":14330414595928666026,"features":"[]","target":8342266644505377308,"profile":92510136562/;"	n
+toggle	assembler.py	/^def toggle(x):$/;"	f

@@ -2,7 +2,12 @@
 
 ### Description
 
-C++ source code obfuscated using #define. The source code has 1 bug; fix it to get the flag.
+I'm trying to write the program to print out the flag,
+with only one bug left. However, before I could fix it,
+my future me stole it and obfuscated it
+~~, preventing the route to dystopia~~.
+Can you help me get back the source code?
+And promise you won't look at the flag?
 
 ### Flag
 

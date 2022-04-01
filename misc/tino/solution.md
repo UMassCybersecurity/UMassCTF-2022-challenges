@@ -1,3 +1,6 @@
+C++ source code obfuscated using #define.
+The source code has 1 bug; fix it to get the flag.
+
 One simple solution is run the source code through C/C++ compiler preprocessor:
 `clang -C -E test.tino.cpp`. Scroll down to the bottom and you will receive the
 source code after applying all `#define`. Checking through the source code,

@@ -3,8 +3,10 @@
 
 ### Description
 
-Given a custom-made archive type embedded in a jpeg file, try guessing the key
-and extracting the content, which includes the flag.
+Who loves games?
+Has anyone tried to open up a game directory and see what's inside?
+I do. I'm pretty sure some others do too.
+This challenge is _mere_-ly based on that. Get it?
 
 ### Flag
 

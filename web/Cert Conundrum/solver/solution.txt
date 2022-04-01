@@ -1,0 +1,3 @@
+Answers for all questions can be seen in source code
+
+FLAG: UMASS{D0E$_UD3My_C0UNT?}

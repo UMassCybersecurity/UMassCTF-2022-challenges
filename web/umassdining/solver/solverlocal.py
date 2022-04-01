@@ -11,8 +11,12 @@ data['essay']="""<script id='debug' src="/static/js/thing.js" data-iloveumass="h
 print(data['essay'])
 #or whatever ip ur hosting this on
 counter = 0
-for i in range(1,3):
-    r1=r.post("http://34.148.103.218:6942/register",data=data)
-    print(r1.text)
+for i in range(1,150):
+    r1 = r.get("http://127.0.0.1:6942")
+    if(i%5==0):
+        time.sleep(.2)
+        r1=r.post("http://127.0.0.1:6942/register",data=data)
+        counter = counter+1
+        print(r1.text)
 
 print(f"Expecting {counter} webhook hits")

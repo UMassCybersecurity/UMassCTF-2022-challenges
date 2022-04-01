@@ -8,7 +8,6 @@
 
 // gcc chal.c -o chal -no-pie -fno-stack-protector
 
-#define PORT  9055
 #define MAGIC 0x1337
 
 struct P1Header {
@@ -22,8 +21,9 @@ struct P2Header {
     unsigned int magic;
     unsigned int temperature;
     unsigned int type;
-    unsigned int size;
-    char         data[4096];
+    unsigned int cup_size;
+    unsigned int length;
+    char         data[512];
     unsigned int checksum; 
 };
 
@@ -72,26 +72,24 @@ int verify_initial_packet(char *buffer) {
 // Verify that the second packets checksum is correct
 int verify_checksum(char *buffer) {
     p2 = (struct P2Header*) buffer;
-    long long sum = 0;
+    int sum = 0;
 
-    for (int i = 0; i < p2->size; i++) {
-        sum += p2->data[i];
+    for (int i = 0; i < p2->length; i++) {
+        sum += (char) p2->data[i];
     }
-
-    //return sum - p2->checksum;
-    return 0;
+    return sum - p2->checksum;
 }
 
 // Start making the coffee
-int make_coffee(int sock) {
+int make_coffee() {
     char size[16];
-    char coffee[1024];
+    char coffee[256];
 
     if (p2->temperature > 150) {
         return 1;
     }
 
-    switch (p2->size) {
+    switch (p2->cup_size) {
         case 0:
             strcpy(size, "Small");
             break;
@@ -107,105 +105,67 @@ int make_coffee(int sock) {
     }
 
     sprintf(coffee, "Good Morning!\n Your %s", size);
-    strcat(coffee, p2->data);
+    strncat(coffee, p2->data, p2->length);
 
     switch (p2->type) {
         case 0:
             strcat(coffee, " Espresso will be ready in 2 minutes.\n");
-            send(sock, coffee, strlen(coffee), 0);
+            write(1, coffee, strlen(coffee));
             break;
         case 1:
             strcat(coffee, " Decaf will be ready in 10 seconds.\n");
-            send(sock, coffee, strlen(coffee), 0);
+            write(1, coffee, strlen(coffee));
             break;
         case 2:
             strcat(coffee, " Honey Spiced Latte will be ready in 20 minutes.\n");
-            send(sock, coffee, strlen(coffee), 0);
+            write(1, coffee, strlen(coffee));
             break;
         default:
-            send(sock, "An error has occured, please try again\n", 39, 0);
-            return 1;
-    }
-    return 0;
-}
-
-// Handle incoming packets
-int handler(int sockfd) {
-    char packet_1[128];
-    char tmp_p2[sizeof(struct P2Header)];
-
-    // Verify first payload meant for verification purposes
-    send(sockfd, "VERIFY\n", 7, 0);
-    recv(sockfd, packet_1, sizeof(packet_1), 0);
-
-    // Verify the initial payload and print SUCCESS | FAILURE
-    if (verify_initial_packet(packet_1) != 0) {
-        send(sockfd, "FAILURE\n", 8, 0);
-        return 1;
-    }
-    send(sockfd, "SUCCESS\n", 8, 0);
-
-    // Receive data packet
-    recv(sockfd, tmp_p2, sizeof(struct P2Header), 0);
-
-    // Verify the second packets checksum
-    if (verify_checksum(tmp_p2) != 0) {
-        send(sockfd, "CHECK FAILURE\n", 14, 0);
-        return 1;
-    }
-    send(sockfd, "CHECK SUCCESS\n", 14, 0);
-
-    switch (Action) {
-        case 1: // Reboot
-            send(sockfd, "Rebooting your CoffeeMaker9000\n", 31, 0);
-            return 1;
-        case 2: // Make Coffee
-            send(sockfd, "Making Coffee\n", 14, 0);
-            make_coffee(sockfd);
-            break;
-        case 3: // Turn off
-            send(sockfd, "Shutting Down...\n", 17, 0);
-            return 1;
-        default:
-            send(sockfd, "An error has occured, please try again\n", 39, 0);
+            write(1, "An error has occured, please try again\n", 39);
             return 1;
     }
     return 0;
 }
 
 int main(int argc, char *argv[]) {
-    int sockfd, s;
-    static int opt = 1;
-    struct sockaddr_in sa;
-    int sa_len = sizeof(sa);
+    char packet_1[128];
+    char tmp_p2[sizeof(struct P2Header)];
 
-    // Create socket
-    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) { return 1; }
+    // Verify first payload meant for verification purposes
+    puts("VERIFY");
+    fgets(packet_1, sizeof(packet_1), stdin);
 
-    // Prepare socket
-    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) < 0 ) {
-        return -1;
+    // Verify the initial payload and print SUCCESS | FAILURE
+    if (verify_initial_packet(packet_1) != 0) {
+        puts("FAILURE");
+        return 1;
     }
+    puts("SUCCESS");
 
-    // Assign IP and PORT
-    sa.sin_family = AF_INET;
-    sa.sin_addr.s_addr = INADDR_ANY;
-    sa.sin_port = htons(PORT);
+    // Receive data packet
+    fgets(tmp_p2, sizeof(tmp_p2), stdin);
 
-    // Bind to the specified port
-    if (bind(sockfd, (struct sockaddr *)&sa, sizeof(sa)) < 0) { return 1; }
+    // Verify the second packets checksum
+    if (verify_checksum(tmp_p2) != 0) {
+        puts("Check FAILURE");
+        return 1;
+    }
+    puts("CHECK SUCCESS");
 
-    // Start listening for incoming connections
-    if (listen(sockfd, 50) < 0) { return 1; }
-
-    // Accept a connection
-    if ((s = accept(sockfd, (struct sockaddr *)&sa, (socklen_t*)&sa_len)) < 0) { return 1; }
-
-    // Launch the connection handler
-    handler(s);
-
-    // Close socket
-    close(sockfd);
-
+    switch (Action) {
+        case 1: // Reboot
+            puts("Rebooting your CoffeeMaker9000");
+            return 1;
+        case 2: // Make Coffee
+            puts("Making Coffee");
+            make_coffee();
+            break;
+        case 3: // Turn off
+            puts("Shutting Down...");
+            return 1;
+        default:
+            puts("An error has occured, please try again");
+            return 1;
+    }
     return 0;
 }

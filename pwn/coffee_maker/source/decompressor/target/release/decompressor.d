@@ -1,0 +1,1 @@
+/home/arduino/github/UMassCTF-2022-challenges/pwn/coffee_maker/source/decompressor/target/release/decompressor: /home/arduino/github/UMassCTF-2022-challenges/pwn/coffee_maker/source/decompressor/src/main.rs

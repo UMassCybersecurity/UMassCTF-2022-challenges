@@ -1,0 +1,1 @@
+python3 -m gunicorn -w 4 --bind 0.0.0.0:4446 main:app

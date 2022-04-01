@@ -33,13 +33,13 @@ def get_register():
             response.set_cookie("auth","-1",secure=True,samesite=None)
         return response
     elif(request.method=='POST'): 
-        if(active_count()<10):
+        if(active_count()<5):
             data = request.form.to_dict()
             thread = Thread(target=bot.checkEssay,kwargs={'data':data})
             thread.start()
             return "We got your request and will read it shortly!",200
         else:
-            return "We are busy right now, try again in a second",200
+            return "We are recieving a lot of traffic, please try again in a bit. (Not part of the challenge btw)",200
 
 @app.route("/review/essay",methods = ['GET','POST'])
 def reviewEssay():

@@ -1,0 +1,11 @@
+Crypto
+
+# HATMASH
+
+What do you mean "We think you spend too much time with matrices."? It's just a hash function, jeez...
+
+nc address port
+
+Files: hatmash.py
+
+Author: Polymero

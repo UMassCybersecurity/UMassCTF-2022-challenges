@@ -1,0 +1,11 @@
+Crypto
+
+# MTRSASS
+
+Two things together are always better than one, right? R- r- right???
+
+nc address port
+
+Files: mtrsass.py
+
+Author: Polymero

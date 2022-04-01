@@ -14,8 +14,7 @@ RUN echo "ctf:ctf" | chpasswd
 
 WORKDIR /home/ctf
 
-COPY ./app .
-COPY ynetd .
+COPY . .
 
 RUN chown -R root:root /home/ctf
 RUN chmod +x /home/ctf/ynetd

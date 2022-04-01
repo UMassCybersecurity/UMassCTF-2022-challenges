@@ -14,12 +14,11 @@ RUN echo "ctf:ctf" | chpasswd
 
 WORKDIR /home/ctf
 
-COPY ./src .
-COPY ynetd .
+COPY . .
 
 RUN chown -R root:root /home/ctf
 RUN chmod +x /home/ctf/ynetd
 
 USER ctf
 EXPOSE 1004
-CMD ./ynetd -p 1004 "python3 math.py"
+CMD ./ynetd -p 1228 "python3 math.py"

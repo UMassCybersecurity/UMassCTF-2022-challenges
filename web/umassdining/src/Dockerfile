@@ -14,5 +14,8 @@ RUN chmod +x geckodriver
 RUN mv geckodriver /usr/bin/geckodriver
 RUN mkdir working && cd working
 COPY . .
+
+EXPOSE 6942
+
 RUN chmod +x run.sh
 ENTRYPOINT /run.sh

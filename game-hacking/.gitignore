@@ -1,0 +1,3 @@
+src/server/users.db
+src/server/__pycache__/
+solver/__pycache__/

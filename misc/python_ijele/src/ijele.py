@@ -8,8 +8,7 @@ def main():
             if keyword in text:
                 print('Play by the rules!!! Try again.')
                 return
-            else:
-                exec(text)
+        exec(text)
     else:
         print('Wrong code to break out. Sorry, try again!')
 

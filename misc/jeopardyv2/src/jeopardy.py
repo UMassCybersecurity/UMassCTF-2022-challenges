@@ -73,8 +73,8 @@ def main():
           'answer': ['4', 'four'], 'answered': False}
     a3 = {'chars': ['}'], 'points': 300, 'question': 'What was the keyboard layout used to decode instructions given to the player in a miscellaneous challenge in last years CTF? (hint: it is not qwerty)',
           'answer': ['dvorak', 'Dvorak'], 'answered': False}
-    a4 = {'chars': ['x'], 'points': 400, 'question': 'Dogs are often used to aid police forces with many tasks. This special kind of dog is especially useful in helping sniff out Cybersecurity-related crimes (like the Subway Scandal)',
-          'answer': ['electronic sniffing dog', 'electronics sniffing dog', 'electronic dog', 'electronics', 'electronic sniffing', 'electronic-sniffing dog', 'electronics-sniffing dog'], 'answered': False}
+    a4 = {'chars': ['x'], 'points': 400, 'question': 'Dogs are often used to aid police forces with many tasks. This special kind of dog is especially useful in helping sniff out Cybersecurity-related crimes (like the Subway Scandal).\nEnter the special kind of dog. It is not the dog breed or the name of the dog involved with the subway scandal.',
+          'answer': ['electronic sniffing dog', 'electronics sniffing dog', 'electronic dog', 'electronics', 'electronic sniffing', 'electronic-sniffing dog', 'electronics-sniffing dog', 'electronic storage dog', 'electronics storage dog', 'electronic-storage dog', 'electronics-storage dog', 'storage dog', 'electronic storage detection', 'electronics storage detection', 'storage detection', 'electronic storage detection dog', 'electronics storage detection dog', 'electronics storage-detection dog'], 'answered': False}
     a5 = {'chars': ['s', 't', 'u', 'v'], 'points': 500, 'question': 'The creator of this challenge is in charge of getting industry professionals to talk to the UMass Cybersecurity Club. Once, there was an industry talk from Oracle where a password was leaked but the presentor was fine with it. What was this password?', 'answer': ['gsh1ggcjhimhy0xamn'], 'answered': False}
 
     b1 = {'chars': [':'], 'points': 100,

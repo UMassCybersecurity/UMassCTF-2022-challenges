@@ -1,0 +1,2 @@
+Buffer overflow in strcpy in the parse_data function. Can be exploited by passing in a malicious zip
+file that performs a ret2dlresolve attack. Exploit script attached.

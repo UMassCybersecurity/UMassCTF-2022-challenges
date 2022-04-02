@@ -1,24 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" href="https://bootswatch.com/5/lux/bootstrap.min.css">
+    <link rel="stylesheet" href="static/css/bootstrap.min.css">
     <title>Among Us Enthusiast Board</title>
+    <style>
+         body {background-color: rgb(151, 149, 148);}
+    </style>
 </head>
 <body>
-    <img src="https://cdn.pixabay.com/photo/2021/02/12/13/43/among-us-6008615__480.png">
-    <h1> Welcome to the Among Us Enthusiast Board!
-    </h1>
-    <div>
-        Leave your sussy comments here :)
-    </div><br>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">Among Us!</a>
+        </div>
+    </nav>
+    <h1> Welcome to the Among Us Enthusiast Board!</h1>
     <form action="/submit" method="POST" class="form-group row">
-        <label for="fname">First name:</label><br>
-        <input type="text" id="fname" name="fname"><br>
-        <label for="lname">Last name:</label><br>
-        <input type="text" id="lname" name="lname"><br>
-        <label for="comment">Comment:</label><br>
-        <input type="text" id="comment" name="comment"><br><br>
-        <input type="submit" value="Submit">
+        <label for="fname" class="form-label mt-4">First name:</label>
+        <input class="form-control" type="text" id="fname" name="fname">
+        <label for="lname" class="form-label mt-4">Last name:</label>
+        <input class="form-control" type="text" id="lname" name="lname">
+        <label for="comment" class="form-label mt-4">Comment:</label>
+        <input class="form-control" type="text" id="comment" name="comment">
+        <br>
+        <input class="btn btn-dark" type="submit" value="Submit">
     </form>
+    <img src="static/images/among-us-6008615__480.webp">
 </body>
 </html>

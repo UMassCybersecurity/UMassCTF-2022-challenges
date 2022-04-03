@@ -6,17 +6,12 @@ admin_cookie = "VEgxUzFTRDRTVVAzUlMzQ1IzVDRETTFOQzAwS0kzTDBMIQ"
 def checkEssay(data):
     opts = Options()
     opts.add_argument("--headless")
-    try:
-        driver = Firefox(executable_path='/usr/bin/geckodriver',options=opts)
-        driver.set_window_size(320, 240)
-        driver.set_page_load_timeout(5)
-        driver.get('http://127.0.0.1:6942/')
-        driver.add_cookie({"name":"auth","value":admin_cookie})
-        driver.get('http://127.0.0.1:6942/review/essay?email={a}&essay={b}'.format(a=data['email'],b=data['essay']))    
-        time.sleep(3)
-        driver.quit()
-    except:
-        driver.quit()
-        raise Exception("Timeout caused by too many browser instances")
 
-#
+    driver = Firefox(executable_path='/usr/bin/geckodriver',options=opts)
+    driver.set_window_size(320, 240)
+    driver.set_page_load_timeout(5)
+    driver.get('http://127.0.0.1:6942/')
+    driver.add_cookie({"name":"auth","value":admin_cookie})
+    driver.get('http://127.0.0.1:6942/review/essay?email={a}&essay={b}'.format(a=data['email'],b=data['essay']))    
+    time.sleep(3)
+    driver.quit()

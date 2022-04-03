@@ -198,7 +198,7 @@ slowprint(" ")
 slowprint(str(i) + ".) What is the subnet mask for a network designed to have 1,164,375 hosts? (Please input in format NUMBER.NUMBER.NUMBER.NUMBER")
 slowprint("")
 user_answer = input("What is your answer? ")
-if user_answer != "255.244.0.0":
+if user_answer != "255.224.0.0":
 	exit()
 slowprint(" ")
 slowprint("CORRECT!")

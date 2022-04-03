@@ -11,7 +11,7 @@ data['essay']="""<script id='debug' src="/static/js/thing.js" data-iloveumass="h
 print(data['essay'])
 #or whatever ip ur hosting this on
 counter = 0
-for i in range(1,150):
+for i in range(1,10):
     r1 = r.get("http://127.0.0.1:6942")
     if(i%5==0):
         time.sleep(.2)

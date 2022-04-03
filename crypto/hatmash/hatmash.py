@@ -55,7 +55,7 @@ def mash(x):
 target_hash = mash(b"gib m3 flag plox?").hex()
 print('TARGET:', target_hash)
 
-ALP = range(ord('!'), ord('~'))
+ALP = range(ord(' '), ord('~'))
 
 
 try:
